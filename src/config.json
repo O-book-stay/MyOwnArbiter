@@ -36,7 +36,7 @@
   "SYNTH_KEEP_HIERARCHY_INSTANCES": ["u_chain"],
   "SYNTH_SHARE_RESOURCES": false,
   "SYNTH_STRATEGY": "DELAY 0",
-  "SYNTH_EXTRA_MAPPING_FILE": "arb_mux_map.v",
+  "SYNTH_EXTRA_MAPPING_FILE": "dir::arb_mux_map.v",
 
   "//": "If you need a custom clock configuration, read the following documentation first:",
   "//": "https://tinytapeout.com/faq/#how-can-i-map-an-additional-external-clock-to-one-of-the-gpios",
