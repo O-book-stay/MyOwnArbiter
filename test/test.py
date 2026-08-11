@@ -85,7 +85,7 @@ async def test_puf_roundtrip(dut):
     """Seed the silicon entropy bank, then run two challenge/response rounds."""
 
     # Seed the uninitialised power-up bank for a deterministic RTL sim.
-    dut.u_puf_top.u_silicon_entropy.st.setimmediatevalue(
+    dut.user_project.u_puf_top.u_silicon_entropy.st.setimmediatevalue(
         int("0123456789ABCDEF0123456789ABCDEF", 16)
     )
 
