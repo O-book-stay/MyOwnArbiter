@@ -27,6 +27,15 @@
   "RUN_LINTER": 1,
   "LINTER_INCLUDE_PDK_MODELS": 1,
 
+  "//": "Arbiter PUF structure preservation: keep the arbiter_chain module",
+  "//": "hierarchical (never flattened), prevent resource sharing between the",
+  "//": "two race paths, and prefer DELAY synthesis which restructures less",
+  "//": "aggressively than the AREA strategies.",
+  "SYNTH_HIERARCHY_MODE": "deferred_flatten",
+  "SYNTH_KEEP_HIERARCHY_MODULES": ["arbiter_chain"],
+  "SYNTH_SHARE_RESOURCES": false,
+  "SYNTH_STRATEGY": "DELAY 0",
+
   "//": "If you need a custom clock configuration, read the following documentation first:",
   "//": "https://tinytapeout.com/faq/#how-can-i-map-an-additional-external-clock-to-one-of-the-gpios",
   "CLOCK_PORT": "clk",
