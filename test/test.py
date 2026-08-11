@@ -80,7 +80,7 @@ async def wait_led(dut, idx, value):
         await Timer(100, units="ns")
 
 
-@cocotb.test(timeout_time=120, timeout_unit="s")
+@cocotb.test(timeout_time=120000, timeout_unit="ms")
 async def test_puf_roundtrip(dut):
     """Seed the silicon entropy bank, then run two challenge/response rounds."""
 
