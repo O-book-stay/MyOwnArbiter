@@ -16,11 +16,14 @@
 // Synthesis preservation (critical):
 //   * (* keep *) on EVERY stage net: Yosys treats each kept net as a
 //     separate cone output, so the two paths cannot be merged.
-//   * (* keep_hierarchy *) on the module: the chain is synthesized as
-//     its own module and never flattened (also enforced through
-//     src/config.json SYNTH_KEEP_HIERARCHY_MODULES).
-//   * SYNTH_SHARE_RESOURCES=false and SYNTH_STRATEGY=DELAY in
-//     src/config.json keep abc from restructuring/merging the paths.
+//   * (* dont_touch *) on every arb_mux instance: the two race paths are
+//     functionally identical, so opt/abc would otherwise fold each stage
+//     mux into a buffer. dont_touch makes Yosys keep the mux cells.
+//   * src/arb_mux_map.v (SYNTH_EXTRA_MAPPING_FILE) maps the preserved
+//     arb_mux cells to the physical sky130_fd_sc_hd__mux2_1 cell.
+//   * SYNTH_HIERARCHY_MODE=keep and SYNTH_SHARE_RESOURCES=false in
+//     src/config.json keep the chain module hierarchical and prevent
+//     resource sharing between the two paths.
 //
 // Simulation-only: per-stage transport delays (ifdef SIM) give the
 // race something to resolve in RTL simulation; ignored in synthesis.
@@ -50,9 +53,19 @@ module arbiter_chain #(
             (* keep = "true" *) wire t_mux, b_mux;
             wire tc = ch[g];
 
-            // 2:1 mux, F = sel ? I1 : I0
-            assign t_mux = tc ? bot[g] : top[g];
-            assign b_mux = tc ? top[g] : bot[g];
+            // 2:1 mux, y = s ? b : a
+            (* dont_touch = "true" *) arb_mux top_mux (
+                .a (top[g]),
+                .b (bot[g]),
+                .s (tc),
+                .y (t_mux)
+            );
+            (* dont_touch = "true" *) arb_mux bot_mux (
+                .a (bot[g]),
+                .b (top[g]),
+                .s (tc),
+                .y (b_mux)
+            );
 
 `ifdef SIM
             // When straight (c=0) the top path is slower -> bot tends to win;
