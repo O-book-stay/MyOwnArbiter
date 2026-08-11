@@ -19,7 +19,7 @@
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, FallingEdge, Timer
+from cocotb.triggers import ClockCycles, Timer
 
 BIT_CYCLES = 416  # CLK_FREQ / BAUD_RATE = 48MHz / 115200 (see puf_defines.v)
 HALF_BIT = 208    # BIT_CYCLES / 2 (even)
@@ -27,15 +27,22 @@ NBYTES = 32       # RESP_BITS / 4
 
 HEX_CHARS = set("0123456789ABCDEFabcdef")
 
+UART_RX_MASK = 0x01  # ui[0] is the UART RX pin; other ui bits stay high
+
+
+def ui_value(bit0):
+    """Build a ui_in vector with bit0 = bit0 and the other bits idle high."""
+    return (0xFF & ~UART_RX_MASK) | (bit0 & UART_RX_MASK)
+
 
 async def send_byte(dut, data):
     """Transmit one 8N1 byte on ui[0] (LSB first)."""
-    dut.ui_in[0].value = 0  # start bit
+    dut.ui_in.value = ui_value(0)  # start bit
     await ClockCycles(dut.clk, BIT_CYCLES)
     for k in range(8):
-        dut.ui_in[0].value = (data >> k) & 1
+        dut.ui_in.value = ui_value((data >> k) & 1)
         await ClockCycles(dut.clk, BIT_CYCLES)
-    dut.ui_in[0].value = 1  # stop bit
+    dut.ui_in.value = ui_value(1)  # stop bit
     await ClockCycles(dut.clk, BIT_CYCLES)
 
 
@@ -45,13 +52,14 @@ async def send_challenge(dut, chars):
 
 
 async def recv_byte(dut):
-    """Wait for a falling edge on uo[0] and sample one 8N1 byte mid-bit."""
-    await FallingEdge(dut.uo_out[0])
+    """Wait for the start bit on uo[0], then sample one 8N1 byte mid-bit."""
+    while (int(dut.uo_out.value) & 1) == 1:
+        await ClockCycles(dut.clk, 1)
     await ClockCycles(dut.clk, HALF_BIT)  # mid of start bit
     val = 0
     for k in range(8):
         await ClockCycles(dut.clk, BIT_CYCLES)
-        if int(dut.uo_out[0].value):
+        if int(dut.uo_out.value) & 1:
             val |= 1 << k
     await ClockCycles(dut.clk, BIT_CYCLES)  # stop bit
     return val
@@ -79,7 +87,7 @@ def make_challenge():
 async def wait_led(dut, idx, value):
     """Wait until uo_out[idx] equals value."""
     while True:
-        if int(dut.uo_out[idx].value) == value:
+        if (int(dut.uo_out.value) >> idx) & 1 == value:
             return
         await Timer(100, units="ns")
 
