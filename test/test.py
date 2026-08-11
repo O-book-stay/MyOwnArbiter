@@ -15,7 +15,9 @@
 #
 # UART timing is done in clock cycles (BIT_CYCLES per bit, matching
 # `BIT_PERIOD` in src/puf_defines.v) instead of wall-clock timers, so the
-# test is exact regardless of the simulated clock period.
+# test is exact regardless of the simulated clock period. A short idle gap
+# is held between bytes so the design's RX synchroniser never misses a
+# start bit. All wait loops are bounded so a failure fails fast.
 
 import cocotb
 from cocotb.clock import Clock
@@ -23,11 +25,14 @@ from cocotb.triggers import ClockCycles, Timer
 
 BIT_CYCLES = 416  # CLK_FREQ / BAUD_RATE = 48MHz / 115200 (see puf_defines.v)
 HALF_BIT = 208    # BIT_CYCLES / 2 (even)
+INTER_BYTE_GAP = 64  # idle cycles between bytes
 NBYTES = 32       # RESP_BITS / 4
 
 HEX_CHARS = set("0123456789ABCDEFabcdef")
 
 UART_RX_MASK = 0x01  # ui[0] is the UART RX pin; other ui bits stay high
+
+MAX_WAIT_CYCLES = 2_000_000  # per received byte / LED wait
 
 
 def ui_value(bit0):
@@ -36,14 +41,14 @@ def ui_value(bit0):
 
 
 async def send_byte(dut, data):
-    """Transmit one 8N1 byte on ui[0] (LSB first)."""
+    """Transmit one 8N1 byte on ui[0] (LSB first) plus an idle gap."""
     dut.ui_in.value = ui_value(0)  # start bit
     await ClockCycles(dut.clk, BIT_CYCLES)
     for k in range(8):
         dut.ui_in.value = ui_value((data >> k) & 1)
         await ClockCycles(dut.clk, BIT_CYCLES)
     dut.ui_in.value = ui_value(1)  # stop bit
-    await ClockCycles(dut.clk, BIT_CYCLES)
+    await ClockCycles(dut.clk, BIT_CYCLES + INTER_BYTE_GAP)
 
 
 async def send_challenge(dut, chars):
@@ -53,8 +58,12 @@ async def send_challenge(dut, chars):
 
 async def recv_byte(dut):
     """Wait for the start bit on uo[0], then sample one 8N1 byte mid-bit."""
-    while (int(dut.uo_out.value) & 1) == 1:
+    for _ in range(MAX_WAIT_CYCLES):
+        if (int(dut.uo_out.value) & 1) == 0:
+            break
         await ClockCycles(dut.clk, 1)
+    else:
+        raise AssertionError("timeout waiting for UART start bit")
     await ClockCycles(dut.clk, HALF_BIT)  # mid of start bit
     val = 0
     for k in range(8):
@@ -85,14 +94,15 @@ def make_challenge():
 
 
 async def wait_led(dut, idx, value):
-    """Wait until uo_out[idx] equals value."""
-    while True:
-        if (int(dut.uo_out.value) >> idx) & 1 == value:
+    """Wait until uo_out[idx] equals value (bounded)."""
+    for _ in range(MAX_WAIT_CYCLES):
+        if ((int(dut.uo_out.value) >> idx) & 1) == value:
             return
-        await Timer(100, units="ns")
+        await ClockCycles(dut.clk, 1)
+    raise AssertionError(f"timeout waiting for led[{idx}] == {value}")
 
 
-@cocotb.test(timeout_time=120000, timeout_unit="ms")
+@cocotb.test(timeout_time=30000, timeout_unit="ms")
 async def test_puf_roundtrip(dut):
     """Seed the silicon entropy bank, then run two challenge/response rounds."""
 
