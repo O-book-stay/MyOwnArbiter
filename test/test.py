@@ -6,20 +6,24 @@
 # The RTL contains no `initial` on purpose (the silicon power-up entropy
 # bank must stay physically random), so the test seeds the bank through
 # the hierarchy to keep the RTL simulation deterministic:
-#   dut.u_puf_top.u_silicon_entropy.st.setimmediatevalue(...)
+#   dut.user_project.u_puf_top.u_silicon_entropy.st.setimmediatevalue(...)
 #
-# Protocol under test (UART 115200 8N1, 48 MHz clock):
+# Protocol under test (UART 115200 8N1):
 #   * send a 32-hex-char challenge on ui[0]
 #   * receive the 128-bit response as 32 hex chars on uo[0]
 #   * two rounds (challenge A / challenge B) must both complete.
+#
+# UART timing is done in clock cycles (BIT_CYCLES per bit, matching
+# `BIT_PERIOD` in src/puf_defines.v) instead of wall-clock timers, so the
+# test is exact regardless of the simulated clock period.
 
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, FallingEdge, Timer
 
-CLK_PERIOD_NS = 20.8333  # 48 MHz
-BIT_NS = 1e9 / 115200    # UART bit period @ 115200 baud
-NBYTES = 32              # RESP_BITS / 4
+BIT_CYCLES = 416  # CLK_FREQ / BAUD_RATE = 48MHz / 115200 (see puf_defines.v)
+HALF_BIT = 208    # BIT_CYCLES / 2 (even)
+NBYTES = 32       # RESP_BITS / 4
 
 HEX_CHARS = set("0123456789ABCDEFabcdef")
 
@@ -27,12 +31,12 @@ HEX_CHARS = set("0123456789ABCDEFabcdef")
 async def send_byte(dut, data):
     """Transmit one 8N1 byte on ui[0] (LSB first)."""
     dut.ui_in[0].value = 0  # start bit
-    await Timer(BIT_NS, units="ns")
+    await ClockCycles(dut.clk, BIT_CYCLES)
     for k in range(8):
         dut.ui_in[0].value = (data >> k) & 1
-        await Timer(BIT_NS, units="ns")
+        await ClockCycles(dut.clk, BIT_CYCLES)
     dut.ui_in[0].value = 1  # stop bit
-    await Timer(BIT_NS, units="ns")
+    await ClockCycles(dut.clk, BIT_CYCLES)
 
 
 async def send_challenge(dut, chars):
@@ -43,13 +47,13 @@ async def send_challenge(dut, chars):
 async def recv_byte(dut):
     """Wait for a falling edge on uo[0] and sample one 8N1 byte mid-bit."""
     await FallingEdge(dut.uo_out[0])
-    await Timer(BIT_NS * 0.5, units="ns")  # mid of start bit
+    await ClockCycles(dut.clk, HALF_BIT)  # mid of start bit
     val = 0
     for k in range(8):
-        await Timer(BIT_NS, units="ns")
+        await ClockCycles(dut.clk, BIT_CYCLES)
         if int(dut.uo_out[0].value):
             val |= 1 << k
-    await Timer(BIT_NS, units="ns")  # stop bit
+    await ClockCycles(dut.clk, BIT_CYCLES)  # stop bit
     return val
 
 
@@ -89,7 +93,7 @@ async def test_puf_roundtrip(dut):
         int("0123456789ABCDEF0123456789ABCDEF", 16)
     )
 
-    cocotb.start_soon(Clock(dut.clk, CLK_PERIOD_NS, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 20, units="ns").start())  # 50 MHz
 
     dut.ena.value = 1
     dut.ui_in.value = 0xFF  # UART RX idle high
