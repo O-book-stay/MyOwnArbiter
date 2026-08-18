@@ -212,7 +212,7 @@ MACRO arbchain
     USE SIGNAL ;
     PORT
       LAYER met3 ;
-        RECT 0.000 82.070 0.300 82.370 ;
+        RECT 0.000 82.750 0.300 83.050 ;
     END
   END arb_rst_n
   PIN q
@@ -279,7 +279,9 @@ MACRO arbchain
       RECT 5.280 0.750 5.680 85.480 ;
       RECT 5.680 0 10.280 85.480 ;
     LAYER met4 ;
-      RECT 0 0 11.280 85.480 ;
+      RECT 0 0 5.230 85.480 ;
+      RECT 5.230 0.75 5.730 85.480 ;
+      RECT 5.730 0 11.280 85.480 ;
   END
 END arbchain
 END LIBRARY
