@@ -1004,3 +1004,37 @@ def emit_artifacts(out_dir):
 
 if __name__ == "__main__":
     main()
+        # After generating/writing the arbchain GDSII file, add:
+    import pya
+
+    # Load the generated GDSII
+    gds_file = "src/macro/arbchain.gds"
+    layout = pya.Layout()
+    layout.read(gds_file)
+
+    cell = layout.cell("arbchain")
+    if cell:
+        # Get the bounding box of the cell
+        bbox = cell.bbox()
+        
+        if bbox:
+            # Define PR boundary layer (typically layer 235, datatype 4 for sky130)
+            pr_layer = pya.LayerInfo(235, 4)
+            layer_info = layout.find_layer(pr_layer)
+            
+            if not layer_info:
+                layer_info = layout.insert_layer(pr_layer)
+            
+            # Draw rectangle around the entire cell
+            polygon = pya.Polygon([
+                pya.Point(bbox.left, bbox.bottom),
+                pya.Point(bbox.right, bbox.bottom),
+                pya.Point(bbox.right, bbox.top),
+                pya.Point(bbox.left, bbox.top)
+            ])
+            
+            cell.shapes(layer_info).insert(polygon)
+        
+        # Save back to GDSII
+        layout.write(gds_file)
+    
