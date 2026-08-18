@@ -4,6 +4,13 @@
 // ============================================================
 // Arbiter switch chain for the iterative feedback strong PUF.
 //
+// NOTE: this file is the BEHAVIOURAL model used for RTL
+// simulation only.  On silicon the switch chain is the symmetric
+// hard macro `arbchain` (src/macro) which is hand-placed and
+// routed with mirror-symmetric delay lines, guaranteeing that the
+// race outcome is dominated by random process variation instead of
+// systematic layout skew.
+//
 // Each stage is two 2:1 muxes:
 //   ch[i] = 0 : straight  (top_out=top_in , bot_out=bot_in)
 //   ch[i] = 1 : cross     (top_out=bot_in , bot_out=top_in)
@@ -12,18 +19,6 @@
 // which one arrives first. The race outcome on silicon depends on the
 // real physical (placement + routing + process) delay asymmetry of the
 // two paths - this is the PUF entropy.
-//
-// Synthesis preservation (critical):
-//   * (* keep *) on EVERY stage net: Yosys treats each kept net as a
-//     separate cone output, so the two paths cannot be merged.
-//   * (* dont_touch *) on every arb_mux instance: the two race paths are
-//     functionally identical, so opt/abc would otherwise fold each stage
-//     mux into a buffer. dont_touch makes Yosys keep the mux cells.
-//   * src/arb_mux_map.v (SYNTH_EXTRA_MAPPING_FILE) maps the preserved
-//     arb_mux cells to the physical sky130_fd_sc_hd__mux2_1 cell.
-//   * SYNTH_HIERARCHY_MODE=keep and SYNTH_SHARE_RESOURCES=false in
-//     src/config.json keep the chain module hierarchical and prevent
-//     resource sharing between the two paths.
 //
 // Simulation-only: per-stage transport delays (ifdef SIM) give the
 // race something to resolve in RTL simulation; ignored in synthesis.

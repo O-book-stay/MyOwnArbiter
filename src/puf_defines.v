@@ -1,20 +1,8 @@
 `ifndef PUF_DEFINES_V
 `define PUF_DEFINES_V
 
-`ifndef RO_COUNT
-`define RO_COUNT        16
-`endif
-
 `ifndef RESP_BITS
-`define RESP_BITS       128
-`endif
-
-`ifndef CNT_WIDTH
-`define CNT_WIDTH       16
-`endif
-
-`ifndef MEASURE_CYCLES
-`define MEASURE_CYCLES  4800        // 100us @ 48MHz per pair
+`define RESP_BITS       32
 `endif
 
 `ifndef CLK_FREQ
@@ -32,8 +20,10 @@
 // ============================================================
 // Strong PUF (iterative feedback arbiter) parameters
 // ============================================================
+// ARB_STAGES is the number of switch stages in the arbiter chain.
+// It must match the symmetric hard macro `arbchain` (src/macro).
 `ifndef ARB_STAGES
-`define ARB_STAGES      48          // switch stages in the arbiter chain
+`define ARB_STAGES      24          // switch stages in the arbiter chain
 `endif
 
 `ifndef ARB_SETTLE_CYCLES
@@ -41,18 +31,11 @@
 `endif
 
 `ifndef BOOT_K
-`define BOOT_K          32          // bootstrap rounds -> hidden[31:0]
+`define BOOT_K          8           // bootstrap rounds -> hidden[7:0]
 `endif
 
 `ifndef VOTE
 `define VOTE            3           // majority-vote depth per response bit
-`endif
-
-// ============================================================
-// Silicon power-up entropy bank (hybrid anchor for the arbiter PUF)
-// ============================================================
-`ifndef SILICON_W
-`define SILICON_W       128
 `endif
 
 `endif

@@ -23,6 +23,11 @@ module tt_um_obookstay_puf (
     input  wire       ena,       // enable - goes high when design is selected
     input  wire       clk,       // clock
     input  wire       rst_n      // not reset
+`ifdef USE_POWER_PINS
+    ,
+    input  wire       VPWR,
+    input  wire       VGND
+`endif
 );
 
     wire uart_tx;
@@ -38,6 +43,11 @@ module tt_um_obookstay_puf (
         .led_r   (led_r),
         .led_g   (led_g),
         .led_b   (led_b)
+`ifdef USE_POWER_PINS
+        ,
+        .VPWR    (VPWR),
+        .VGND    (VGND)
+`endif
     );
 
     assign uo_out[0] = uart_tx;

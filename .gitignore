@@ -11,3 +11,19 @@ test/sim_build
 test/__pycache__/
 test/results.xml
 test/gate_level_netlist.v
+AGENTS.md
+agents.md
+
+__pycache__/
+*.pyc
+*.vvp
+tt/
+
+# PDN debug artifacts (keep local, don't ship)
+pdn_*.tcl
+pdn_*.def
+pdn_*.rpt
+or_help*.tcl
+run_dump.sh
+run_help.sh
+run_pdn_debug.sh

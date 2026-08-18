@@ -1,12 +1,12 @@
 ## How it works
 
-Challenge-response PUF over UART: a 32-hex-char challenge in, a 128-bit hex
+Challenge-response PUF over UART: an 8-hex-char challenge in, a 32-bit hex
 response out (115200 8N1).
 
 ## How to test
 
-Release reset, then send a 32-hex-char challenge on `ui[0]`. The response is
-sent as 32 hex chars on `uo[0]`.
+Release reset, then send an 8-hex-char challenge on `ui[0]`. The response is
+sent as 8 hex chars on `uo[0]`.
 
 ## External hardware
 

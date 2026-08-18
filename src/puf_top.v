@@ -9,31 +9,21 @@ module puf_top (
     output wire     led_r,
     output wire     led_g,
     output wire     led_b
+`ifdef USE_POWER_PINS
+    ,
+    input  wire     VPWR,
+    input  wire     VGND
+`endif
 );
 
     // ============================================================
     // Internal wires
     // ============================================================
-    (* keep = "true" *) wire [`RO_COUNT-1:0] ro_pulses;
-    wire [4:0]                mux_sel_a;
-    wire [4:0]                mux_sel_b;
-    wire                      mux_a_out;
-    wire                      mux_b_out;
-    wire                      ro_enable;
-    wire                      cnt_rst_n;
-    reg  [`CNT_WIDTH-1:0]     cnt_a;
-    reg  [`CNT_WIDTH-1:0]     cnt_b;
-
     // Arbiter chain + latch (keep nets visible so the optimizer never
     // considers the chain/arbiter dangling)
     (* keep = "true" *) wire launch;
     (* keep = "true" *) wire arb_rst_n;
     (* keep = "true" *) wire arb_q;
-    (* keep = "true" *) wire top_out;
-    (* keep = "true" *) wire bot_out;
-
-    // Silicon power-up entropy bank (hybrid anchor)
-    wire [`SILICON_W-1:0]     silicon_bits;
 
     // LFSR (challenge / keystream)
     wire                      lfsr_load;
@@ -56,78 +46,31 @@ module puf_top (
     wire                      race_active;
 
     // ============================================================
-    // 1. RO array
+    // 1. Arbiter switch chain (the strong-PUF core)
+    //
+    // On silicon this is the symmetric hard macro `arbchain`
+    // (src/macro) whose two delay lines are laid out mirror
+    // symmetric about the macro centreline, so the race outcome is
+    // dominated by random process variation rather than systematic
+    // routing skew.  `arbchain` is a black box in synthesis (its
+    // `.vh` header is provided via MACROS in src/config.json); the
+    // behavioural model (arbchain.v -> arbiter_chain + arbiter_cell)
+    // is used for RTL simulation only.
     // ============================================================
-    ro_array u_ro_array (
-        .enable (ro_enable),
-        .ro_out (ro_pulses)
-    );
-
-    (* keep = "true" *) wire mux_a_raw = ro_pulses[mux_sel_a];
-    (* keep = "true" *) wire mux_b_raw = ro_pulses[mux_sel_b];
-    assign mux_a_out = mux_a_raw;
-    assign mux_b_out = mux_b_raw;
-
-    // Synchronous edge-detect counters. The original FPGA version clocked
-    // these from the (asynchronous) RO nets; a register clocked by a data
-    // net is not acceptable for the LibreLane flow, so the counters now
-    // count rising edges of the selected RO output on the main clock.
-    reg mux_a_d, mux_b_d;
-
-    always @(posedge clk) begin
-        if (!cnt_rst_n) begin
-            mux_a_d <= 1'b0;
-            cnt_a   <= {`CNT_WIDTH{1'b0}};
-        end else begin
-            mux_a_d <= mux_a_out;
-            if (mux_a_out && !mux_a_d)
-                cnt_a <= cnt_a + 1'b1;
-        end
-    end
-
-    always @(posedge clk) begin
-        if (!cnt_rst_n) begin
-            mux_b_d <= 1'b0;
-            cnt_b   <= {`CNT_WIDTH{1'b0}};
-        end else begin
-            mux_b_d <= mux_b_out;
-            if (mux_b_out && !mux_b_d)
-                cnt_b <= cnt_b + 1'b1;
-        end
-    end
-
-    // ============================================================
-    // 2. Arbiter switch chain (the strong-PUF core)
-    // ============================================================
-    arbiter_chain #(
-        .STAGES (`ARB_STAGES),
-        .IDX    (0)
-    ) u_chain (
-        .launch  (launch),
-        .ch      (lfsr_state),
-        .top_out (top_out),
-        .bot_out (bot_out)
-    );
-
-    arbiter_cell u_arbiter (
-        .top_in    (top_out),
-        .bot_in    (bot_out),
+    arbchain u_chain (
+        .q         (arb_q),
+        .launch    (launch),
         .arb_rst_n (arb_rst_n),
-        .q         (arb_q)
+        .ch        (lfsr_state)
+`ifdef USE_POWER_PINS
+        ,
+        .VPWR      (VPWR),
+        .VGND      (VGND)
+`endif
     );
 
     // ============================================================
-    // 3. Silicon power-up entropy bank (hybrid anchor)
-    // ============================================================
-    silicon_entropy #(
-        .W (`SILICON_W)
-    ) u_silicon_entropy (
-        .clk  (clk),
-        .bits (silicon_bits)
-    );
-
-    // ============================================================
-    // 4. LFSR (challenge derivation + keystream)
+    // 2. LFSR (challenge derivation + keystream)
     // ============================================================
     lfsr #(
         .W (`ARB_STAGES)
@@ -143,7 +86,7 @@ module puf_top (
     );
 
     // ============================================================
-    // 5. UART
+    // 3. UART
     // ============================================================
     uart_tx u_uart_tx (
         .clk      (clk),
@@ -164,21 +107,14 @@ module puf_top (
     );
 
     // ============================================================
-    // 6. PUF controller (FSM)
+    // 4. PUF controller (FSM)
     // ============================================================
     puf_controller u_controller (
         .clk          (clk),
         .rst_n        (rst_n),
-        .ro_enable    (ro_enable),
-        .cnt_rst_n    (cnt_rst_n),
-        .mux_sel_a    (mux_sel_a),
-        .mux_sel_b    (mux_sel_b),
-        .cnt_a_val    (cnt_a),
-        .cnt_b_val    (cnt_b),
         .launch       (launch),
         .arb_rst_n    (arb_rst_n),
         .arb_q        (arb_q),
-        .silicon_bits (silicon_bits),
         .lfsr_load    (lfsr_load),
         .lfsr_en      (lfsr_en),
         .lfsr_inject  (lfsr_inject),

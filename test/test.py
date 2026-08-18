@@ -3,14 +3,9 @@
 
 # cocotb testbench for the Arbiter PUF (tt_um_obookstay_puf).
 #
-# The RTL contains no `initial` on purpose (the silicon power-up entropy
-# bank must stay physically random), so the test seeds the bank through
-# the hierarchy to keep the RTL simulation deterministic:
-#   dut.user_project.u_puf_top.u_silicon_entropy.st.setimmediatevalue(...)
-#
 # Protocol under test (UART 115200 8N1):
-#   * send a 32-hex-char challenge on ui[0]
-#   * receive the 128-bit response as 32 hex chars on uo[0]
+#   * send an 8-hex-char challenge on ui[0]
+#   * receive the 32-bit response as 8 hex chars on uo[0]
 #   * two rounds (challenge A / challenge B) must both complete.
 #
 # UART timing is done in clock cycles (BIT_CYCLES per bit, matching
@@ -26,7 +21,7 @@ from cocotb.triggers import ClockCycles, Timer
 BIT_CYCLES = 416  # CLK_FREQ / BAUD_RATE = 48MHz / 115200 (see puf_defines.v)
 HALF_BIT = 208    # BIT_CYCLES / 2 (even)
 INTER_BYTE_GAP = 64  # idle cycles between bytes
-NBYTES = 32       # RESP_BITS / 4
+NBYTES = 8        # RESP_BITS / 4
 
 HEX_CHARS = set("0123456789ABCDEFabcdef")
 
@@ -104,12 +99,7 @@ async def wait_led(dut, idx, value):
 
 @cocotb.test(timeout_time=30000, timeout_unit="ms")
 async def test_puf_roundtrip(dut):
-    """Seed the silicon entropy bank, then run two challenge/response rounds."""
-
-    # Seed the uninitialised power-up bank for a deterministic RTL sim.
-    dut.user_project.u_puf_top.u_silicon_entropy.st.setimmediatevalue(
-        int("0123456789ABCDEF0123456789ABCDEF", 16)
-    )
+    """Run two challenge/response rounds."""
 
     cocotb.start_soon(Clock(dut.clk, 20, units="ns").start())  # 50 MHz
 
