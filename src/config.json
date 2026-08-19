@@ -26,7 +26,7 @@
       "sdf": {},
       "instances": {
         "u_puf_top.u_chain": {
-            "location": [
+          "location": [
             83.3,
             7.2
           ],
@@ -38,11 +38,15 @@
   "PDN_CFG": "dir::pdn_cfg.tcl",
   "PDN_HORIZONTAL_HALO": 0.3,
   "PDN_VERTICAL_HALO": 1.5,
-  "FP_MACRO_HORIZONTAL_HALO": 0.5,
-  "FP_MACRO_VERTICAL_HALO": 0.5,
+  "FP_MACRO_HORIZONTAL_HALO": 2.0,
+  "FP_MACRO_VERTICAL_HALO": 2.0,
   "CLOCK_PORT": "clk",
   "RUN_KLAYOUT_XOR": 0,
-  "RUN_KLAYOUT_DRC": 0,
+  "RUN_KLAYOUT_DRC": 1,
+  "DRC_EXCLUDE_CELLS": [
+    "arbchain"
+  ],
+  "MAGIC_ZEROIZE_ORIGIN": true,
   "DESIGN_REPAIR_BUFFER_OUTPUT_PORTS": 0,
   "TOP_MARGIN_MULT": 1,
   "BOTTOM_MARGIN_MULT": 1,
