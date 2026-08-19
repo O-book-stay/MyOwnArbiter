@@ -1,3 +1,6 @@
+/* verilator lint_off TIMESCALEMOD */
+/* verilator lint_off WIDTHEXPAND */
+/* verilator lint_off WIDTHTRUNC */
 `timescale 1ns/1ps
 `include "puf_defines.v"
 
