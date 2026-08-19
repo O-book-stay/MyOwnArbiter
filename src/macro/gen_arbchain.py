@@ -442,74 +442,90 @@ def emit_artifacts(out_dir,pc):
          f"module {name} (",f"  output q, input launch, input arb_rst_n, input [{STAGES-1}:0] ch","  );",
          "endmodule","`endif"]
     open(os.path.join(out_dir,"arbchain.vh"),"w").write("\n".join(vh)+"\n")
-    nl=["// gate-level netlist","`ifdef USE_POWER_PINS","`celldefine",f"module {name} (",
-        f"  output q, input launch, input arb_rst_n, input [{STAGES-1}:0] ch,",
-        "  input VPWR, input VGND","  );","`else",f"module {name} (",
-        f"  output q, input launch, input arb_rst_n, input [{STAGES-1}:0] ch","  );","`endif",
-        f"  wire [{STAGES}:0] top;",f"  wire [{STAGES}:0] bot;","  wire d, gate;",
-        "  assign top[0]=launch;","  assign bot[0]=launch;"]
+    # ============================================================
+    # 重写：纯结构化 netlist（netgen 友好，无任何 `assign`）
+    # ============================================================
+    PWR_ON  = "".join(["`ifdef USE_POWER_PINS",
+                    " , .VPWR(VPWR), .VGND(VGND), .VPB(VPWR), .VNB(VGND)",
+                    "`endif"])
+
+    nl = ["// gate-level netlist (pure structural - no continuous assigns)",
+        "`ifdef USE_POWER_PINS", "`celldefine",
+        f"module {name} (",
+        f" output q, input launch, input arb_rst_n, input [{STAGES-1}:0] ch,",
+        " input VPWR, input VGND",
+        " );",
+        "`else",
+        f"module {name} (",
+        f" output q, input launch, input arb_rst_n, input [{STAGES-1}:0] ch",
+        " );",
+        "`endif",
+        f" wire [{STAGES}:0] top;",
+        f" wire [{STAGES}:0] bot;"]
+
     for g in range(STAGES):
-        at,bt=( "top[0]","bot[0]") if g==0 else (f"top[{g}]",f"bot[{g}]")
-        ab,bb=( "bot[0]","top[0]") if g==0 else (f"bot[{g}]",f"top[{g}]")
-        nl+= [f"  sky130_fd_sc_hd__mux2_1 u_t{g} (",f"    .A0({at}), .A1({bt}), .S(ch[{g}]), .X(top[{g+1}])",
-              "`ifdef USE_POWER_PINS","    , .VPWR(VPWR), .VGND(VGND), .VPB(VPWR), .VNB(VGND)","`endif","  );",
-              f"  sky130_fd_sc_hd__mux2_1 u_b{g} (",f"    .A0({ab}), .A1({bb}), .S(ch[{g}]), .X(bot[{g+1}])",
-              "`ifdef USE_POWER_PINS","    , .VPWR(VPWR), .VGND(VGND), .VPB(VPWR), .VNB(VGND)","`endif","  );"]
-    nl+= [f"  assign d=top[{STAGES}];",f"  assign gate=bot[{STAGES}];",
-          "  sky130_fd_sc_hd__dlrtp_1 u_latch (","    .D(d), .GATE(gate), .RESET_B(arb_rst_n), .Q(q)",
-          "`ifdef USE_POWER_PINS","    , .VPWR(VPWR), .VGND(VGND), .VPB(VPWR), .VNB(VGND)","`endif","  );",
-          "endmodule","`endcelldefine"]
-    open(os.path.join(out_dir,"arbchain.nl.v"),"w").write("\n".join(nl)+"\n")
-    bv=[ "`timescale 1ns/1ps","`ifdef USE_POWER_PINS",
-         f"module {name} (q, launch, arb_rst_n, ch, VPWR, VGND);","`else",
-         f"module {name} (q, launch, arb_rst_n, ch);","`endif",
-         f"  output q; input launch; input arb_rst_n; input [{STAGES-1}:0] ch;",
-         "  wire top_out, bot_out;",
-         f"  arbiter_chain #(.STAGES({STAGES}), .IDX(0)) u_chain (.launch(launch), .ch(ch), .top_out(top_out), .bot_out(bot_out));",
-         "  arbiter_cell u_arbiter (.top_in(top_out), .bot_in(bot_out), .arb_rst_n(arb_rst_n), .q(q));",
-         "endmodule"]
-    open(os.path.join(out_dir,"arbchain.v"),"w").write("\n".join(bv)+"\n")
-    print("wrote arbchain.lef / .vh / .nl.v / .v")
-        # ---- Liberty view: 让 macro 不再被 black-box ----
+        # stage 0 直接用 launch 播种，取代原来的 assign top[0]=launch
+        src = "launch" if g == 0 else None
+        at, bt = (src, src) if src else (f"top[{g}]", f"bot[{g}]")
+        ab, bb = (src, src) if src else (f"bot[{g}]", f"top[{g}]")
+        nl += [f" sky130_fd_sc_hd__mux2_1 u_t{g} (",
+            f" .A0({at}), .A1({bt}), .S(ch[{g}]), .X(top[{g+1}])",
+            PWR_ON, " );",
+            f" sky130_fd_sc_hd__mux2_1 u_b{g} (",
+            f" .A0({ab}), .A1({bb}), .S(ch[{g}]), .X(bot[{g+1}])",
+            PWR_ON, " );"]
+
+    nl += [f" sky130_fd_sc_hd__dlrtp_1 u_latch (",   # 直接连 wire，去掉 assign d/gate
+        f" .D(top[{STAGES}]), .GATE(bot[{STAGES}]), .RESET_B(arb_rst_n), .Q(q)",
+        PWR_ON, " );",
+        "endmodule", "`endcelldefine"]
+    open(os.path.join(out_dir, "arbchain.nl.v"), "w").write("".join(nl) + "\n")
+
+    # ============================================================
+    # 重写：合法 liberty（cell 块 + 阈值 + units）
+    # ============================================================
     L2 = []
-    L2.append("library (arbchain_lib) {")
-    L2.append("  delay_model : table_lookup;")
-    L2.append('  time_unit : "1ns";')
-    L2.append('  voltage_unit : "1V";')
-    L2.append('  current_unit : "1mA";')
-    L2.append('  pulling_resistance_unit : "1kohm";')
-    L2.append("  capacitive_load_unit (1.0, pf);")
-    L2.append('  leakage_power_unit : "1nW";')
-    L2.append("  nom_process : 1.0;")
-    L2.append("  nom_voltage : 1.80;")
-    L2.append("  nom_temperature : 25;")
-    L2.append("  operating_conditions (nom_tt_025C_1v80) {")
-    L2.append("    process : 1.0;")
-    L2.append("    voltage : 1.80;")
-    L2.append("    temperature : 25;")
-    L2.append("    tree_type : balanced_tree;")
-    L2.append("  }")
-    L2.append("  default_operating_conditions : nom_tt_025C_1v80;")
-    L2.append("  default_max_transition : 1.0;")
-    L2.append("  default_max_fanout : 20;")
-    L2.append("  default_fanout_load : 1.0;")
-    L2.append("  default_input_pin_cap : 0.04;")
-    L2.append("  default_output_pin_cap : 0.06;")
-    L2.append("")
-    L2.append("  cell (arbchain) {")
-    L2.append("    area : %.4f;" % (TW * H))          # 17.28 * 85.48
-    L2.append("    cell_leakage_power : 5000.0;")
-    L2.append("    pg_pin (VPWR) { voltage_name : VPWR; pg_type : primary_power; }")
-    L2.append("    pg_pin (VGND) { voltage_name : VGND; pg_type : primary_ground; }")
-    L2.append("    pin (launch)    { direction : input;  capacitance : 0.03; max_capacitance : 0.5; }")
-    L2.append("    pin (arb_rst_n) { direction : input;  capacitance : 0.02; max_capacitance : 0.5; }")
+    a = L2.append
+    a("library (arbchain_lib) {")
+    a(" delay_model : table_lookup;")
+    a(' time_unit : "1ns";')
+    a(' voltage_unit : "1V";')
+    a(' current_unit : "1mA";')
+    a(' pulling_resistance_unit : "1kohm";')
+    a(" capacitive_load_unit (1.0, pf);")
+    a(' leakage_power_unit : "1nW";')
+    # -- OpenROAD 强制要求的 8 个阈值（sky130 惯例 50 / 10 / 90）--
+    a(" input_threshold_pct_rise : 50;")
+    a(" input_threshold_pct_fall : 50;")
+    a(" output_threshold_pct_rise : 50;")
+    a(" output_threshold_pct_fall : 50;")
+    a(" slew_lower_threshold_pct_rise : 10;")
+    a(" slew_lower_threshold_pct_fall : 10;")
+    a(" slew_upper_threshold_pct_rise : 90;")
+    a(" slew_upper_threshold_pct_fall : 90;")
+    a(" nom_process : 1.0;")
+    a(" nom_voltage : 1.80;")
+    a(" nom_temperature : 25;")
+    a(" operating_conditions (nom_tt_025C_1v80) {")
+    a("  process : 1.0;")
+    a("  voltage : 1.80;")
+    a("  temperature : 25;")
+    a(" }")
+    a(" default_operating_conditions : nom_tt_025C_1v80;")
+    # -- 关键：cell 名必须与 LEF macro 名一致（arbchain），否则 ORD-2011 --
+    a(f" cell ({name}) {{")
+    a(f"  area : {TW*H:.2f};")
+    a("  pg_pin (VPWR) { voltage_name : VPWR; pg_type : primary_power; }")
+    a("  pg_pin (VGND) { voltage_name : VGND; pg_type : primary_ground; }")
+    a("  pin (launch) { direction : input; capacitance : 0.03; max_capacitance : 0.5; }")
+    a("  pin (arb_rst_n) { direction : input; capacitance : 0.02; max_capacitance : 0.5; }")
     for g in range(STAGES):
-        L2.append("    pin (ch[%d]) { direction : input;  capacitance : 0.04; max_capacitance : 0.5; }" % g)
-    L2.append("    pin (q)         { direction : output; max_capacitance : 0.5; }")
-    L2.append("  }")
-    L2.append("}")
+        a(f"  pin (ch[{g}]) {{ direction : input; capacitance : 0.04; max_capacitance : 0.5; }}")
+    a("  pin (q) { direction : output; capacitance : 0.05; max_capacitance : 0.5; }")
+    a(" }")
+    a("}")
     with open(os.path.join(out_dir, "arbchain.lib"), "w") as fh:
-        fh.write("\n".join(L2) + "\n")
+        fh.write("".join(L2) + "\n")
 
 if __name__=="__main__":
     main()
