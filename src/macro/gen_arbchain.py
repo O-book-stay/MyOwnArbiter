@@ -73,7 +73,7 @@ GRID=0.005
 LAY_LI1 =(67,20); LAY_MET1=(68,20); LAY_MET2=(69,20)
 LAY_MET3=(70,20); LAY_MET4=(71,20)
 LAY_MCON=(67,44); LAY_VIA1=(68,44); LAY_VIA2=(69,44); LAY_VIA3=(70,44)
-LAY_PR  =(235,0)                      # [R2-8]
+LAY_PR  =(235,4)                      # [R2-8]
 
 EV={"a0":0.8,"a1t":0.40,"a1b":0.74,"x":1.26,"ch":1.06}
 OD=dict(EV)
@@ -391,7 +391,7 @@ def main():
             ym=snap((VP_RAIL[0]+VP_RAIL[1])/2)
             d.box(LAY_VIA1,sx-V1/2,ym-V1/2,sx+V1/2,ym+V1/2)
             rect_c(LAY_MET1,*M1P_V1,sx,ym); rect_c(LAY_MET2,*M2P_V1,sx,ym)
-    d.box((235, 0), 0, 0, TW, H)
+    d.box((235, 4), 0, 0, TW, H)
     d.box((236, 0), 0, 0, TW, H)
 
     out_dir=args.out; os.makedirs(out_dir,exist_ok=True)
@@ -470,6 +470,46 @@ def emit_artifacts(out_dir,pc):
          "endmodule"]
     open(os.path.join(out_dir,"arbchain.v"),"w").write("\n".join(bv)+"\n")
     print("wrote arbchain.lef / .vh / .nl.v / .v")
+        # ---- Liberty view: 让 macro 不再被 black-box ----
+    L2 = []
+    L2.append("library (arbchain_lib) {")
+    L2.append("  delay_model : table_lookup;")
+    L2.append('  time_unit : "1ns";')
+    L2.append('  voltage_unit : "1V";')
+    L2.append('  current_unit : "1mA";')
+    L2.append('  pulling_resistance_unit : "1kohm";')
+    L2.append("  capacitive_load_unit (1.0, pf);")
+    L2.append('  leakage_power_unit : "1nW";')
+    L2.append("  nom_process : 1.0;")
+    L2.append("  nom_voltage : 1.80;")
+    L2.append("  nom_temperature : 25;")
+    L2.append("  operating_conditions (nom_tt_025C_1v80) {")
+    L2.append("    process : 1.0;")
+    L2.append("    voltage : 1.80;")
+    L2.append("    temperature : 25;")
+    L2.append("    tree_type : balanced_tree;")
+    L2.append("  }")
+    L2.append("  default_operating_conditions : nom_tt_025C_1v80;")
+    L2.append("  default_max_transition : 1.0;")
+    L2.append("  default_max_fanout : 20;")
+    L2.append("  default_fanout_load : 1.0;")
+    L2.append("  default_input_pin_cap : 0.04;")
+    L2.append("  default_output_pin_cap : 0.06;")
+    L2.append("")
+    L2.append("  cell (arbchain) {")
+    L2.append("    area : %.4f;" % (TW * H))          # 17.28 * 85.48
+    L2.append("    cell_leakage_power : 5000.0;")
+    L2.append("    pg_pin (VPWR) { voltage_name : VPWR; pg_type : primary_power; }")
+    L2.append("    pg_pin (VGND) { voltage_name : VGND; pg_type : primary_ground; }")
+    L2.append("    pin (launch)    { direction : input;  capacitance : 0.03; max_capacitance : 0.5; }")
+    L2.append("    pin (arb_rst_n) { direction : input;  capacitance : 0.02; max_capacitance : 0.5; }")
+    for g in range(STAGES):
+        L2.append("    pin (ch[%d]) { direction : input;  capacitance : 0.04; max_capacitance : 0.5; }" % g)
+    L2.append("    pin (q)         { direction : output; max_capacitance : 0.5; }")
+    L2.append("  }")
+    L2.append("}")
+    with open(os.path.join(out_dir, "arbchain.lib"), "w") as fh:
+        fh.write("\n".join(L2) + "\n")
 
 if __name__=="__main__":
     main()
