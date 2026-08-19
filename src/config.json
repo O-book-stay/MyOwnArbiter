@@ -21,9 +21,11 @@
       "nl": [
         "dir::macro/arbchain.nl.v"
       ],
-      "lib": [
-        "dir::macro/arbchain.lib"
-      ],
+      "lib": {
+        "tt_025C_1v80": [
+          "dir::macro/arbchain.lib"
+        ]
+      },
       "spice": [],
       "sdf": {},
       "instances": {
