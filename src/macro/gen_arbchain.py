@@ -391,7 +391,8 @@ def main():
             ym=snap((VP_RAIL[0]+VP_RAIL[1])/2)
             d.box(LAY_VIA1,sx-V1/2,ym-V1/2,sx+V1/2,ym+V1/2)
             rect_c(LAY_MET1,*M1P_V1,sx,ym); rect_c(LAY_MET2,*M2P_V1,sx,ym)
-    d.box(LAY_PR,0,0,TW,H)
+    d.box((235, 0), 0, 0, TW, H)
+    d.box((236, 0), 0, 0, TW, H)
 
     out_dir=args.out; os.makedirs(out_dir,exist_ok=True)
     gds=os.path.join(out_dir,"arbchain.gds"); ly.write(gds); print("wrote",gds)
