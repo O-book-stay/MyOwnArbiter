@@ -1,20 +1,20 @@
-// gate-level netlist of the arbchain macro (generated)
+// gate-level netlist
 `ifdef USE_POWER_PINS
 `celldefine
 module arbchain (
   output q, input launch, input arb_rst_n, input [23:0] ch,
   input VPWR, input VGND
-);
+  );
 `else
 module arbchain (
   output q, input launch, input arb_rst_n, input [23:0] ch
-);
+  );
 `endif
   wire [24:0] top;
   wire [24:0] bot;
   wire d, gate;
-  assign top[0] = launch;
-  assign bot[0] = launch;
+  assign top[0]=launch;
+  assign bot[0]=launch;
   sky130_fd_sc_hd__mux2_1 u_t0 (
     .A0(top[0]), .A1(bot[0]), .S(ch[0]), .X(top[1])
 `ifdef USE_POWER_PINS
@@ -303,8 +303,8 @@ module arbchain (
     , .VPWR(VPWR), .VGND(VGND), .VPB(VPWR), .VNB(VGND)
 `endif
   );
-  assign d = top[24];
-  assign gate = bot[24];
+  assign d=top[24];
+  assign gate=bot[24];
   sky130_fd_sc_hd__dlrtp_1 u_latch (
     .D(d), .GATE(gate), .RESET_B(arb_rst_n), .Q(q)
 `ifdef USE_POWER_PINS

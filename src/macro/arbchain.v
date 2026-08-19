@@ -1,5 +1,4 @@
 `timescale 1ns/1ps
-// behavioural model of the arbchain macro (RTL simulation only)
 `ifdef USE_POWER_PINS
 module arbchain (q, launch, arb_rst_n, ch, VPWR, VGND);
 `else
