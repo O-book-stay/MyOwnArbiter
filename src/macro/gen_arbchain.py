@@ -524,11 +524,14 @@ def emit_artifacts(out_dir,pc):
     a("  pin (launch) { direction : input; capacitance : 0.03; max_capacitance : 0.5; }")
     a("  pin (arb_rst_n) { direction : input; capacitance : 0.02; max_capacitance : 0.5; }")
     a("  bus (ch) {")
-    a("   bus_type : bus24;")
-    a("   direction : input;")
-    a("   capacitance : 0.04;")
-    a("   max_capacitance : 0.5;")
-    a("  }")
+    # 删除 type(bus24) 定义，删除 bus(ch) 块
+    # 替换为逐引脚：
+    for g in range(STAGES):
+        a(f"  pin (ch[{g}]) {{")
+        a("   direction : input;")
+        a("   capacitance : 0.04;")
+        a("   max_capacitance : 0.5;")
+        a("  }")
     a("  pin (q) { direction : output; capacitance : 0.05; max_capacitance : 0.5; }")
     a(" }")
     a("}")
