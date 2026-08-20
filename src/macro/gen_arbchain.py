@@ -64,7 +64,7 @@ class _UF:
         if ra!=rb: self.nodes[rb]=ra
 
 # ---------------- geometry / technology ----------------
-STAGES=24; MUX_W,MUX_H=4.14,2.72; LATCH_W,LATCH_H=5.98,2.72
+STAGES=16; MUX_W,MUX_H=4.14,2.72; LATCH_W,LATCH_H=5.98,2.72
 PITCH,GAP=3.40,1.5; CH=2*GAP; W=2*(GAP+MUX_W); XC=W/2; YOFF=0.24
 H=(STAGES+1)*PITCH+2*YOFF
 MUX_LEF="sky130_fd_sc_hd__mux2_1"; LATCH_LEF="sky130_fd_sc_hd__dlrtp_1"

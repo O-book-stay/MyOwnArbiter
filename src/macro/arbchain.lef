@@ -5,7 +5,7 @@ DIVIDERCHAR "/" ;
 MACRO arbchain
   CLASS BLOCK ;
   ORIGIN 0 0 ;
-  SIZE 17.280 BY 85.480 ;
+  SIZE 17.280 BY 58.280 ;
   SYMMETRY X Y ;
   PIN ch[0]
     DIRECTION INPUT ;
@@ -135,70 +135,6 @@ MACRO arbchain
         RECT 0.000 52.150 0.300 52.450 ;
     END
   END ch[15]
-  PIN ch[16]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 55.550 0.300 55.850 ;
-    END
-  END ch[16]
-  PIN ch[17]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 58.950 0.300 59.250 ;
-    END
-  END ch[17]
-  PIN ch[18]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 62.350 0.300 62.650 ;
-    END
-  END ch[18]
-  PIN ch[19]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 65.750 0.300 66.050 ;
-    END
-  END ch[19]
-  PIN ch[20]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 69.150 0.300 69.450 ;
-    END
-  END ch[20]
-  PIN ch[21]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 72.550 0.300 72.850 ;
-    END
-  END ch[21]
-  PIN ch[22]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 75.950 0.300 76.250 ;
-    END
-  END ch[22]
-  PIN ch[23]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 79.350 0.300 79.650 ;
-    END
-  END ch[23]
   PIN launch
     DIRECTION INPUT ;
     USE SIGNAL ;
@@ -212,7 +148,7 @@ MACRO arbchain
     USE SIGNAL ;
     PORT
       LAYER met3 ;
-        RECT 0.000 84.410 0.300 84.710 ;
+        RECT 0.000 57.210 0.300 57.510 ;
     END
   END arb_rst_n
   PIN q
@@ -220,7 +156,7 @@ MACRO arbchain
     USE SIGNAL ;
     PORT
       LAYER met3 ;
-        RECT 16.600 83.730 17.280 84.030 ;
+        RECT 16.600 56.530 17.280 56.830 ;
     END
   END q
   PIN VPWR
@@ -228,7 +164,7 @@ MACRO arbchain
     USE POWER ;
     PORT
       LAYER met2 ;
-        RECT 11.280 84.780 17.280 85.480 ;
+        RECT 11.280 57.580 17.280 58.280 ;
     END
   END VPWR
   PIN VGND
@@ -236,26 +172,26 @@ MACRO arbchain
     USE GROUND ;
     PORT
       LAYER met1 ;
-        RECT 11.280 84.800 17.280 85.470 ;
+        RECT 11.280 57.600 17.280 58.270 ;
     END
   END VGND
   OBS
     LAYER li1 ;
-      RECT 0 0 17.280 85.480 ;
+      RECT 0 0 17.280 58.280 ;
     LAYER met1 ;
-      RECT 0 0 16.600 84.780 ;
-      RECT 16.600 0 17.280 82.080 ;
-      RECT 16.600 83.840 17.280 84.780 ;
+      RECT 0 0 16.600 57.580 ;
+      RECT 16.600 0 17.280 54.880 ;
+      RECT 16.600 56.640 17.280 57.580 ;
     LAYER met2 ;
-      RECT 0.600 0 16.600 84.780 ;
-      RECT 16.600 0 17.280 81.925 ;
-      RECT 16.600 83.840 17.280 84.780 ;
+      RECT 0.600 0 16.600 57.580 ;
+      RECT 16.600 0 17.280 54.725 ;
+      RECT 16.600 56.640 17.280 57.580 ;
     LAYER met3 ;
-      RECT 0.600 0 3.700 85.480 ;
-      RECT 4.100 0 10.280 85.480 ;
+      RECT 0.600 0 3.700 58.280 ;
+      RECT 4.100 0 10.280 58.280 ;
     LAYER met4 ;
-      RECT 0 0 3.650 85.480 ;
-      RECT 4.150 0 11.280 85.480 ;
+      RECT 0 0 3.650 58.280 ;
+      RECT 4.150 0 11.280 58.280 ;
   END
 END arbchain
 END LIBRARY
