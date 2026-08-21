@@ -101,7 +101,7 @@ module puf_controller (
     // ============================================================
     // Seeds / constants / mixing
     // ============================================================
-    wire [`ARB_STAGES-1:0] BS_SEED = `ARB_STAGES'hE5A3C7;
+    wire [`ARB_STAGES-1:0] BS_SEED = `ARB_STAGES'hA3C7;
 
     wire [`ARB_STAGES-1:0] hidden    = {{`ARB_STAGES-`BOOT_K{1'b0}}, r0};
     wire [`ARB_STAGES-1:0] main_seed = hidden ^ fold_fn(challenge);

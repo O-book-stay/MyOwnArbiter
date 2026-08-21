@@ -166,14 +166,15 @@ class Cell:
     # [R2-2] centre of the largest li polygon inside the LEF rect
     def li_pin_center(self,pin,trans):
         dbu=self.dbu; best=None; best_a=0
+        li1=self._region(67,20).transformed(trans)
         for layer,r in self.pins.get(pin,[]):
             if layer!="li1": continue
             rb=pya.Box(round(r[0]/dbu),round(r[1]/dbu),
                        round(r[2]/dbu),round(r[3]/dbu)).transformed(trans)
-            for po in self.pin_metal.get(pin,pya.Region()).each():
-                if po.bbox().inside(rb):
-                    a=po.area()
-                    if a>best_a: best_a=a; best=po.bbox()
+            inter=(pya.Region(rb)&li1).merged()
+            for po in inter.each():
+                a=po.area()
+                if a>best_a: best_a=a; best=po.bbox()
         if best is None: return None
         return (best.center().x*dbu, best.center().y*dbu)
 
@@ -197,6 +198,29 @@ class Draw:
 
 def row_tracks(g): return EV if g%2==0 else OD
 MET3_XOFF,MET3_XPITCH=0.34,0.68
+
+def top_trans(g): return pya.Trans(0,False,0,round((g*PITCH+YOFF)*1000))
+def bot_trans(g): return (pya.Trans(0,False,round(W*1000),round((g*PITCH+YOFF)*1000))*pya.Trans.M90)
+def latch_trans(y): return pya.Trans(0,False,round(((W-LATCH_W)/2)*1000),round(y*1000))
+
+def pin_rects_um(cell, trans, pin):
+    """Return the pin rects (um, macro coords) for a placed instance."""
+    out = []
+    dbu = cell.dbu
+    for _, r in cell.pins.get(pin, []):
+        b = pya.Box(round(r[0]/dbu), round(r[1]/dbu),
+                    round(r[2]/dbu), round(r[3]/dbu))
+        b = b.transformed(trans)
+        out.append((b.left*dbu, b.bottom*dbu, b.right*dbu, b.top*dbu))
+    return out
+
+def safe_access(cell, trans, pin, y_track):
+    """Access point (x, y) in macro coords: the li pin centre that the
+    generator draws the mcon/via-stack at (matches gen's li_pin_center)."""
+    c = cell.li_pin_center(pin, trans)
+    if c is None:
+        return None
+    return (snap(c[0]), snap(c[1]))
 
 def main():
     ap=argparse.ArgumentParser()
@@ -524,7 +548,7 @@ def emit_artifacts(out_dir,pc):
     a("  pin (launch) { direction : input; capacitance : 0.03; max_capacitance : 0.5; }")
     a("  pin (arb_rst_n) { direction : input; capacitance : 0.02; max_capacitance : 0.5; }")
     a("  bus (ch) {")
-    a("   bus_type : bus24;")
+    a(f"   bus_type : bus{STAGES};")
     a("   direction : input;")
     a("   capacitance : 0.04;")
     a("   max_capacitance : 0.5;")

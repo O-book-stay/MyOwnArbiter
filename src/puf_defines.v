@@ -23,7 +23,7 @@
 // ARB_STAGES is the number of switch stages in the arbiter chain.
 // It must match the symmetric hard macro `arbchain` (src/macro).
 `ifndef ARB_STAGES
-`define ARB_STAGES      24          // switch stages in the arbiter chain
+`define ARB_STAGES      16          // switch stages in the arbiter chain
 `endif
 
 `ifndef ARB_SETTLE_CYCLES
