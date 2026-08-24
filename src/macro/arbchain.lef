@@ -3,195 +3,195 @@ VERSION 5.8 ;
 BUSBITCHARS "[]" ;
 DIVIDERCHAR "/" ;
 MACRO arbchain
-  CLASS BLOCK ;
-  ORIGIN 0 0 ;
-  SIZE 17.280 BY 58.280 ;
-  SYMMETRY X Y ;
-  PIN ch[0]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 1.150 0.300 1.450 ;
-    END
-  END ch[0]
-  PIN ch[1]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 4.550 0.300 4.850 ;
-    END
-  END ch[1]
-  PIN ch[2]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 7.950 0.300 8.250 ;
-    END
-  END ch[2]
-  PIN ch[3]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 11.350 0.300 11.650 ;
-    END
-  END ch[3]
-  PIN ch[4]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 14.750 0.300 15.050 ;
-    END
-  END ch[4]
-  PIN ch[5]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 18.150 0.300 18.450 ;
-    END
-  END ch[5]
-  PIN ch[6]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 21.550 0.300 21.850 ;
-    END
-  END ch[6]
-  PIN ch[7]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 24.950 0.300 25.250 ;
-    END
-  END ch[7]
-  PIN ch[8]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 28.350 0.300 28.650 ;
-    END
-  END ch[8]
-  PIN ch[9]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 31.750 0.300 32.050 ;
-    END
-  END ch[9]
-  PIN ch[10]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 35.150 0.300 35.450 ;
-    END
-  END ch[10]
-  PIN ch[11]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 38.550 0.300 38.850 ;
-    END
-  END ch[11]
-  PIN ch[12]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 41.950 0.300 42.250 ;
-    END
-  END ch[12]
-  PIN ch[13]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 45.350 0.300 45.650 ;
-    END
-  END ch[13]
-  PIN ch[14]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 48.750 0.300 49.050 ;
-    END
-  END ch[14]
-  PIN ch[15]
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 52.150 0.300 52.450 ;
-    END
-  END ch[15]
-  PIN launch
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met4 ;
-        RECT 3.750 0.000 4.050 0.700 ;
-    END
-  END launch
-  PIN arb_rst_n
-    DIRECTION INPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 0.000 57.210 0.300 57.510 ;
-    END
-  END arb_rst_n
-  PIN q
-    DIRECTION OUTPUT ;
-    USE SIGNAL ;
-    PORT
-      LAYER met3 ;
-        RECT 16.600 56.530 17.280 56.830 ;
-    END
-  END q
-  PIN VPWR
-    DIRECTION INOUT ;
-    USE POWER ;
-    PORT
-      LAYER met2 ;
-        RECT 11.280 57.580 17.280 58.280 ;
-    END
-  END VPWR
-  PIN VGND
-    DIRECTION INOUT ;
-    USE GROUND ;
-    PORT
-      LAYER met1 ;
-        RECT 11.280 57.600 17.280 58.270 ;
-    END
-  END VGND
-  OBS
-    LAYER li1 ;
-      RECT 0 0 17.280 58.280 ;
-    LAYER met1 ;
-      RECT 0 0 16.600 57.580 ;
-      RECT 16.600 0 17.280 54.880 ;
-      RECT 16.600 56.640 17.280 57.580 ;
-    LAYER met2 ;
-      RECT 0.600 0 16.600 57.580 ;
-      RECT 16.600 0 17.280 54.725 ;
-      RECT 16.600 56.640 17.280 57.580 ;
-    LAYER met3 ;
-      RECT 0.600 0 3.700 58.280 ;
-      RECT 4.100 0 10.280 58.280 ;
-    LAYER met4 ;
-      RECT 0 0 3.650 58.280 ;
-      RECT 4.150 0 11.280 58.280 ;
-  END
+ CLASS BLOCK ;
+ ORIGIN 0 0 ;
+ SIZE 17.280 BY 78.680 ;
+ SYMMETRY X Y ;
+ PIN ch[0]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 1.685 0.300 1.985 ;
+ END
+ END ch[0]
+ PIN ch[1]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 6.285 0.300 6.585 ;
+ END
+ END ch[1]
+ PIN ch[2]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 10.885 0.300 11.185 ;
+ END
+ END ch[2]
+ PIN ch[3]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 15.485 0.300 15.785 ;
+ END
+ END ch[3]
+ PIN ch[4]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 20.085 0.300 20.385 ;
+ END
+ END ch[4]
+ PIN ch[5]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 24.685 0.300 24.985 ;
+ END
+ END ch[5]
+ PIN ch[6]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 29.285 0.300 29.585 ;
+ END
+ END ch[6]
+ PIN ch[7]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 33.885 0.300 34.185 ;
+ END
+ END ch[7]
+ PIN ch[8]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 38.485 0.300 38.785 ;
+ END
+ END ch[8]
+ PIN ch[9]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 43.085 0.300 43.385 ;
+ END
+ END ch[9]
+ PIN ch[10]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 47.685 0.300 47.985 ;
+ END
+ END ch[10]
+ PIN ch[11]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 52.285 0.300 52.585 ;
+ END
+ END ch[11]
+ PIN ch[12]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 56.885 0.300 57.185 ;
+ END
+ END ch[12]
+ PIN ch[13]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 61.485 0.300 61.785 ;
+ END
+ END ch[13]
+ PIN ch[14]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 66.085 0.300 66.385 ;
+ END
+ END ch[14]
+ PIN ch[15]
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met2 ;
+ RECT 0.000 70.685 0.300 70.985 ;
+ END
+ END ch[15]
+ PIN launch
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met4 ;
+ RECT 4.850 0.000 5.150 0.700 ;
+ END
+ END launch
+ PIN arb_rst_n
+ DIRECTION INPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met3 ;
+ RECT 0.000 76.740 0.300 77.040 ;
+ END
+ END arb_rst_n
+ PIN q
+ DIRECTION OUTPUT ;
+ USE SIGNAL ;
+ PORT
+ LAYER met3 ;
+ RECT 16.600 76.090 17.280 76.390 ;
+ END
+ END q
+ PIN VPWR
+ DIRECTION INOUT ;
+ USE POWER ;
+ PORT
+ LAYER met2 ;
+ RECT 13.200 77.280 14.950 77.980 ;
+ END
+ END VPWR
+ PIN VGND
+ DIRECTION INOUT ;
+ USE GROUND ;
+ PORT
+ LAYER met1 ;
+ RECT 12.000 78.000 17.280 78.670 ;
+ END
+ END VGND
+ OBS
+ LAYER li1 ;
+ RECT 0 0 17.280 78.680 ;
+ LAYER met1 ;
+ RECT 0.600 0 12.000 78.000 ;
+ RECT 0 0 4.700 73.840 ;
+ RECT 6.100 0 12.000 73.840 ;
+ LAYER met2 ;
+ RECT 0.600 0 17.280 0.400 ;
+ RECT 6.600 0 17.280 73.840 ;
+ RECT 0.600 76.640 17.280 77.280 ;
+ LAYER met3 ;
+ RECT 0.600 0 4.750 78.680 ;
+ RECT 5.250 0 10.280 78.680 ;
+ LAYER met4 ;
+ RECT 0 0 4.750 78.680 ;
+ RECT 5.250 0 11.280 78.680 ;
+ END
 END arbchain
 END LIBRARY

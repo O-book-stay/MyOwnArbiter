@@ -176,7 +176,7 @@ class Cell:
                 a=po.area()
                 if a>best_a: best_a=a; best=po.bbox()
         if best is None: return None
-        return (best.center().x*dbu, best.center().y*dbu)
+        return (((best.left+best.right)/2)*dbu, ((best.bottom+best.top)/2)*dbu)
 
 class Draw:
     def __init__(self,ly,top):
@@ -417,6 +417,25 @@ def main():
             rect_c(LAY_MET1,*M1P_V1,sx,ym); rect_c(LAY_MET2,*M2P_V1,sx,ym)
     d.box((235, 4), 0, 0, TW, H)
     d.box((236, 0), 0, 0, TW, H)
+
+    # ---------- pin labels on the mux / latch instances ----------
+    # Text labels (net "inst.pin") at each pin access point, drawn on a
+    # dedicated text layer (80,20). Not part of the routing manifest.
+    def add_labels():
+        lab_layer = d.l((80, 20))
+        def lab(cell, trans, inst, pin):
+            c = cell.li_pin_center(pin, trans)
+            if c is None: return
+            t = pya.Text(f"{inst}.{pin}", round(c[0]*1000), round(c[1]*1000))
+            t.size = 200
+            macro.shapes(lab_layer).insert(t)
+        for g in range(STAGES):
+            for pin in ("A0", "A1", "S", "X"):
+                lab(mux, top_trans(g), f"u_t{g}", pin)
+                lab(mux, bot_trans(g), f"u_b{g}", pin)
+        for pin in ("D", "GATE", "Q", "RESET_B"):
+            lab(latch, latch_trans(ly_r), "u_latch", pin)
+    add_labels()
 
     out_dir=args.out; os.makedirs(out_dir,exist_ok=True)
     gds=os.path.join(out_dir,"arbchain.gds"); ly.write(gds); print("wrote",gds)
