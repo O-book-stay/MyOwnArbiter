@@ -48,11 +48,22 @@ class UnionFind:
             self.p[rb] = ra
 
 
-def access(m, cell, trans, pin):
-    c = cell.li_pin_center(pin, trans)
-    if c is None:
-        return None
-    return (m.snap(c[0]), m.snap(c[1]))
+def access(cell, kind, g, pin):
+    """must match the generator's drawn tap exactly."""
+    return cell.access_point(kind, g, pin)
+
+
+def trans_of(m, kind, g):
+    ylat = m.STAGES * m.PITCH + m.YOFF
+    if kind == "t":
+        return pya.Trans(0, False, 0, round((g * m.PITCH + m.YOFF) * 1000))
+    if kind == "b":
+        return (pya.Trans(0, False, round(m.W * 1000),
+                          round((g * m.PITCH + m.YOFF) * 1000)) *
+                pya.Trans.M90)
+    return pya.Trans(0, False,
+                     round(((m.W - m.LATCH_W) / 2) * 1000),
+                     round(ylat * 1000))
 
 
 def pin_rects_um(cell, trans, pin):
@@ -159,38 +170,36 @@ def main():
         return uf.find(node_id) if node_id is not None else None
 
     # ------------------------------------------------------------------
-    # intended netlist (v2 topology)
+    # intended netlist (v2 topology, R4 channel swap)
     # ------------------------------------------------------------------
     nets = {}
 
-    def add(netname, cell, trans, pin):
-        pt = access(m, cell, trans, pin)
-        if pt is None:
-            print(f"  !! no access for net {netname} pin {pin}")
-            return
-        nd = add_pin(cell, trans, pin, pt[0], pt[1])
+    def add(netname, cell, kind, g, pin):
+        pt = access(cell, kind, g, pin)
+        tr = trans_of(m, kind, g)
+        nd = add_pin(cell, tr, pin, pt[0], pt[1])
         nets.setdefault(netname, []).append(nd)
 
     for g in range(STAGES):
-        add(f"ch[{g}]", mux, m.top_trans(g), "S")
-        add(f"ch[{g}]", mux, m.bot_trans(g), "S")
+        add(f"ch[{g}]", mux, "t", g, "S")
+        add(f"ch[{g}]", mux, "b", g, "S")
     for g in range(1, STAGES):
-        add(f"top[{g}]", mux, m.top_trans(g - 1), "X")
-        add(f"top[{g}]", mux, m.top_trans(g), "A0")
-        add(f"top[{g}]", mux, m.bot_trans(g), "A1")
-        add(f"bot[{g}]", mux, m.bot_trans(g - 1), "X")
-        add(f"bot[{g}]", mux, m.top_trans(g), "A1")
-        add(f"bot[{g}]", mux, m.bot_trans(g), "A0")
+        add(f"top[{g}]", mux, "t", g - 1, "X")
+        add(f"top[{g}]", mux, "t", g, "A0")
+        add(f"top[{g}]", mux, "b", g, "A1")
+        add(f"bot[{g}]", mux, "b", g - 1, "X")
+        add(f"bot[{g}]", mux, "t", g, "A1")
+        add(f"bot[{g}]", mux, "b", g, "A0")
     for pin in ("A0", "A1"):
-        add("launch", mux, m.top_trans(0), pin)
-        add("launch", mux, m.bot_trans(0), pin)
+        add("launch", mux, "t", 0, pin)
+        add("launch", mux, "b", 0, pin)
     ylat = STAGES * PITCH + YOFF
-    add("top[%d]" % STAGES, mux, m.top_trans(STAGES - 1), "X")
-    add("bot[%d]" % STAGES, mux, m.bot_trans(STAGES - 1), "X")
-    add("top[%d]" % STAGES, latch, m.latch_trans(ylat), "D")
-    add("bot[%d]" % STAGES, latch, m.latch_trans(ylat), "GATE")
-    add("q", latch, m.latch_trans(ylat), "Q")
-    add("arb_rst_n", latch, m.latch_trans(ylat), "RESET_B")
+    add("top[%d]" % STAGES, mux, "t", STAGES - 1, "X")
+    add("bot[%d]" % STAGES, mux, "b", STAGES - 1, "X")
+    add("top[%d]" % STAGES, latch, "L", 0, "D")
+    add("bot[%d]" % STAGES, latch, "L", 0, "GATE")
+    add("q", latch, "L", 0, "Q")
+    add("arb_rst_n", latch, "L", 0, "RESET_B")
 
     bridge()
 
@@ -237,6 +246,36 @@ def main():
             bad += 1
             print(f"SHORT: nets {seen[c]} and {name} share component {c}")
         seen[c] = name
+
+    # ------------------------------------------------------------------
+    # [R4-1] chain parity: both racing chains must traverse the same
+    # number of every via layer.  Counted here as via2 cuts per net
+    # component (each chain: X entry via1-only + one stub drop + one
+    # met3 hop => identical via2 totals per stage).
+    # ------------------------------------------------------------------
+    v2count = {}
+    for (i, reg) in polys.get((69, 44), []):
+        r = uf.find(i)
+        v2count[r] = v2count.get(r, 0) + 1
+
+    def net_via2(name):
+        c = net_comp.get(name)
+        return v2count.get(c, -1) if c is not None else -1
+
+    par_bad = 0
+    for k in range(1, STAGES + 1):
+        a, b = net_via2(f"top[{k}]"), net_via2(f"bot[{k}]")
+        tag = "" if a == b else "   <-- ASYMMETRIC"
+        if a != b:
+            par_bad += 1
+            bad += 1
+        print(f"parity stage {k:2d}: top[{k}] via2={a:2d}  "
+              f"bot[{k}] via2={b:2d}{tag}")
+    la, lb = net_via2("launch"), None
+    qa = net_via2("q")
+    print(f"launch via2={la}  q via2={qa}")
+    print("PARITY:", "OK" if par_bad == 0 else f"{par_bad} stages asymmetric")
+
     print()
     print("FAILED nets:", bad)
     sys.exit(1 if bad else 0)

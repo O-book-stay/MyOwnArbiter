@@ -1,6 +1,7 @@
-VERSION 5.8 ;
-BUSBITCHARS "[]" ;
-DIVIDERCHAR "/" ;
+VERSION 5.7 ;
+  NOWIREEXTENSIONATPIN ON ;
+  DIVIDERCHAR "/" ;
+  BUSBITCHARS "[]" ;
 MACRO sky130_fd_sc_hd__dlrtp_1
   CLASS CORE ;
   FOREIGN sky130_fd_sc_hd__dlrtp_1 ;
@@ -144,4 +145,5 @@ MACRO sky130_fd_sc_hd__dlrtp_1
         RECT 2.385 1.415 2.675 1.460 ;
   END
 END sky130_fd_sc_hd__dlrtp_1
+
 END LIBRARY

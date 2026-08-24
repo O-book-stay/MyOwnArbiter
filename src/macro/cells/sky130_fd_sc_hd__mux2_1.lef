@@ -1,6 +1,7 @@
-VERSION 5.8 ;
-BUSBITCHARS "[]" ;
-DIVIDERCHAR "/" ;
+VERSION 5.7 ;
+  NOWIREEXTENSIONATPIN ON ;
+  DIVIDERCHAR "/" ;
+  BUSBITCHARS "[]" ;
 MACRO sky130_fd_sc_hd__mux2_1
   CLASS CORE ;
   FOREIGN sky130_fd_sc_hd__mux2_1 ;
@@ -109,4 +110,5 @@ MACRO sky130_fd_sc_hd__mux2_1
         RECT 0.000 -0.085 4.140 0.085 ;
   END
 END sky130_fd_sc_hd__mux2_1
+
 END LIBRARY
