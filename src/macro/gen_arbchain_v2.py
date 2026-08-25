@@ -713,7 +713,7 @@ def emit_artifacts(out_dir,pc):
          f" .D(top[{STAGES}]), .GATE(bot[{STAGES}]), "
          f".RESET_B(arb_rst_n), .Q(q)",
          PWR_ON," );","endmodule","`endcelldefine"]
-    open(os.path.join(out_dir,"arbchain.nl.v"),"w").write("".join(nl)+"\n")
+    open(os.path.join(out_dir,"arbchain.nl.v"),"w").write("\n".join(nl)+"\n")
 
     # liberty
     L2=[]; a=L2.append
