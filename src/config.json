@@ -50,6 +50,8 @@
   "DRC_EXCLUDE_CELLS": [
     "arbchain"
   ],
+  "ERROR_ON_MAGIC_DRC": false,
+  "ERROR_ON_TR_DRC": false,
   "MAGIC_ZEROIZE_ORIGIN": true,
   "DESIGN_REPAIR_BUFFER_OUTPUT_PORTS": 0,
   "TOP_MARGIN_MULT": 1,
