@@ -3,8 +3,12 @@
 // ============================================================
 // Iterative-feedback arbiter strong PUF controller.
 //
-// Flow per query (8-hex-char challenge -> 8-hex-char response):
-//   S_RX_CHALLENGE : collect 8 hex chars -> challenge[31:0]
+// Flow per query (parallel challenge -> 4-hex-char response):
+//   S_WAIT_CHALLENGE: wait for a NEW value on the parallel
+//                     challenge bus {ui_in, uio_in} (change
+//                     detection).  The first round after reset
+//                     fires on any value; pulse rst_n to re-run
+//                     the same challenge.
 //   S_BOOT_SETUP   : seed LFSR with the public bootstrap seed
 //   bootstrap      : BOOT_K rounds, VOTE races each (majority vote),
 //                    hidden r0[BOOT_K-1:0] = voted bits, LFSR fed back
@@ -45,9 +49,8 @@ module puf_controller (
     input  wire                     uart_busy,
     input  wire                     uart_done,
 
-    // UART RX (challenge input)
-    input  wire [7:0]               uart_rx_data,
-    input  wire                     uart_rx_valid,
+    // Parallel challenge bus (quasi-static; sampled on value change)
+    input  wire [`RESP_BITS-1:0]   challenge_bus,
 
     // Status LEDs
     output reg                      led_r,
@@ -64,15 +67,15 @@ module puf_controller (
     // ============================================================
     // State machine (S_DONE must stay 4'd9 for tb compatibility)
     // ============================================================
-    localparam S_IDLE         = 4'd0;
-    localparam S_RX_CHALLENGE = 4'd1;
-    localparam S_SEND_WAIT    = 4'd8;
-    localparam S_DONE         = 4'd9;
-    localparam S_RACE_RESET   = 4'd10;
-    localparam S_RACE_LAUNCH  = 4'd11;
-    localparam S_RACE_SETTLE  = 4'd12;
-    localparam S_RACE_READ    = 4'd13;
-    localparam S_BOOT_SETUP   = 4'd15;
+    localparam S_IDLE            = 4'd0;
+    localparam S_WAIT_CHALLENGE  = 4'd1;
+    localparam S_SEND_WAIT       = 4'd8;
+    localparam S_DONE            = 4'd9;
+    localparam S_RACE_RESET      = 4'd10;
+    localparam S_RACE_LAUNCH     = 4'd11;
+    localparam S_RACE_SETTLE     = 4'd12;
+    localparam S_RACE_READ       = 4'd13;
+    localparam S_BOOT_SETUP      = 4'd15;
 
     localparam PH_BOOT = 2'd0;
     localparam PH_MAIN = 2'd2;
@@ -93,7 +96,8 @@ module puf_controller (
     // Challenge / response state
     // ============================================================
     reg [`RESP_BITS-1:0] challenge;
-    reg [2:0]            challenge_idx;
+    reg [`RESP_BITS-1:0] prev_challenge; // last measured challenge
+    reg                  have_prev;      // 0 after reset: fire on any value
     reg [`BOOT_K-1:0]     r0;         // bootstrap hidden part
     reg [3:0]            nibble_acc; // response nibble being assembled
     reg [2:0]            uart_byte_idx;
@@ -155,28 +159,6 @@ module puf_controller (
         end
     endfunction
 
-    function is_hex_char;
-        input [7:0] b;
-        begin
-            is_hex_char = ((b >= 8'h30 && b <= 8'h39) ||
-                           (b >= 8'h41 && b <= 8'h46) ||
-                           (b >= 8'h61 && b <= 8'h66));
-        end
-    endfunction
-
-    function [3:0] hex2nibble;
-        input [7:0] b;
-        begin
-            case (b)
-                8'h30, 8'h31, 8'h32, 8'h33, 8'h34,
-                8'h35, 8'h36, 8'h37, 8'h38, 8'h39: hex2nibble = b[3:0];
-                8'h41, 8'h42, 8'h43, 8'h44, 8'h45, 8'h46: hex2nibble = b[3:0] + 4'h9;
-                8'h61, 8'h62, 8'h63, 8'h64, 8'h65, 8'h66: hex2nibble = b[3:0] + 4'h9;
-                default: hex2nibble = 4'h0;
-            endcase
-        end
-    endfunction
-
     // ============================================================
     // FSM
     // ============================================================
@@ -201,8 +183,9 @@ module puf_controller (
             vote_acc      <= 2'd0;
             race_bit_d    <= 1'b0;
             phase         <= PH_BOOT;
-            challenge     <= {`RESP_BITS{1'b0}};
-            challenge_idx <= 3'd0;
+            challenge      <= {`RESP_BITS{1'b0}};
+            prev_challenge <= {`RESP_BITS{1'b0}};
+            have_prev      <= 1'b0;
             r0            <= {`BOOT_K{1'b0}};
             nibble_acc    <= 4'd0;
             uart_byte_idx <= 3'd0;
@@ -216,7 +199,7 @@ module puf_controller (
 
             case (state)
 
-                // Reset entry: wait for an 8-hex-char challenge
+                // Reset entry: wait for a challenge on the bus
                 S_IDLE: begin
                     led_r         <= 1'b0;
                     led_g         <= 1'b0;
@@ -228,21 +211,21 @@ module puf_controller (
                     race_cnt      <= 2'd0;
                     vote_acc      <= 2'd0;
                     nibble_acc    <= 4'd0;
-                    challenge_idx <= 3'd0;
                     uart_byte_idx <= 3'd0;
-                    state         <= S_RX_CHALLENGE;
+                    state         <= S_WAIT_CHALLENGE;
                 end
 
-                S_RX_CHALLENGE: begin
+                // Wait for a NEW challenge on the parallel bus.  The
+                // first round after reset fires on any value; later
+                // rounds need a bus value different from the one just
+                // measured (pulse rst_n to repeat a challenge).
+                S_WAIT_CHALLENGE: begin
                     led_b <= 1'b1;
-                    if (uart_rx_valid && is_hex_char(uart_rx_data)) begin
-                        challenge[`RESP_BITS - 1 - challenge_idx*4 -: 4] <= hex2nibble(uart_rx_data);
-                        if (challenge_idx >= `RESP_BITS/4 - 1) begin
-                            challenge_idx <= 3'd0;
-                            state         <= S_BOOT_SETUP;
-                        end else begin
-                            challenge_idx <= challenge_idx + 1'b1;
-                        end
+                    if (!have_prev || challenge_bus != prev_challenge) begin
+                        challenge      <= challenge_bus;
+                        prev_challenge <= challenge_bus;
+                        have_prev      <= 1'b1;
+                        state          <= S_BOOT_SETUP;
                     end
                 end
 
@@ -384,7 +367,7 @@ module puf_controller (
                     led_r <= 1'b0;
                     led_g <= 1'b1;
                     led_b <= 1'b0;
-                    state <= S_RX_CHALLENGE;
+                    state <= S_WAIT_CHALLENGE;
                 end
 
                 default: state <= S_IDLE;

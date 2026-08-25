@@ -8,7 +8,7 @@ module puf_top (
     input  wire     clk,
     input  wire     rst_n,
     output wire     uart_tx,
-    input  wire     uart_rx,
+    input  wire [`RESP_BITS-1:0] challenge_bus,
     output wire     led_r,
     output wire     led_g,
     output wire     led_b
@@ -36,13 +36,11 @@ module puf_top (
     wire [`ARB_STAGES-1:0]    lfsr_state;
     wire [`ARB_STAGES-1:0]    lfsr_xmask;
 
-    // UART
+    // UART TX
     wire                      uart_tx_start;
     wire [7:0]                uart_tx_data;
     wire                      uart_tx_busy;
     wire                      uart_tx_done;
-    wire [7:0]                uart_rx_data;
-    wire                      uart_rx_valid;
 
     // LED / race status
     wire                      led_g_ctrl;
@@ -89,7 +87,7 @@ module puf_top (
     );
 
     // ============================================================
-    // 3. UART
+    // 3. UART TX (response output)
     // ============================================================
     uart_tx u_uart_tx (
         .clk      (clk),
@@ -99,14 +97,6 @@ module puf_top (
         .tx_pin   (uart_tx),
         .tx_busy  (uart_tx_busy),
         .tx_done  (uart_tx_done)
-    );
-
-    uart_rx u_uart_rx (
-        .clk      (clk),
-        .rst_n    (rst_n),
-        .rx_pin   (uart_rx),
-        .rx_data  (uart_rx_data),
-        .rx_valid (uart_rx_valid)
     );
 
     // ============================================================
@@ -128,8 +118,7 @@ module puf_top (
         .uart_data    (uart_tx_data),
         .uart_busy    (uart_tx_busy),
         .uart_done    (uart_tx_done),
-        .uart_rx_data (uart_rx_data),
-        .uart_rx_valid(uart_rx_valid),
+        .challenge_bus(challenge_bus),
         .led_r        (led_r),
         .led_g        (led_g_ctrl),
         .led_b        (led_b),

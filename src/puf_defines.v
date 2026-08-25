@@ -2,7 +2,7 @@
 `define PUF_DEFINES_V
 
 `ifndef RESP_BITS
-`define RESP_BITS       32
+`define RESP_BITS       16          // challenge bus width AND response bits
 `endif
 
 `ifndef CLK_FREQ

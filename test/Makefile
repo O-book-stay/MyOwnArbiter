@@ -10,7 +10,7 @@ SRC_DIR = $(PWD)/../src
 # arbiter_chain, arbiter_cell) wrapped in arbchain.v (src/macro);
 # synthesis does NOT see these (they are excluded from info.yaml
 # source_files).
-PROJECT_SOURCES = puf_defines.v arb_mux.v arbiter_chain.v arbiter_cell.v puf_top.v puf_controller.v lfsr.v uart_rx.v uart_tx.v tt_um_obookstay_puf.v
+PROJECT_SOURCES = puf_defines.v arb_mux.v arbiter_chain.v arbiter_cell.v puf_top.v puf_controller.v lfsr.v uart_tx.v tt_um_obookstay_puf.v
 
 ifneq ($(GATES),yes)
 

@@ -27,7 +27,6 @@ project:
     - "puf_top.v"
     - "puf_controller.v"
     - "lfsr.v"
-    - "uart_rx.v"
     - "uart_tx.v"
     - "tt_um_obookstay_puf.v"
 
@@ -35,14 +34,14 @@ project:
 # This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
   # Inputs
-  ui[0]: "UART RX (115200 8N1)"
-  ui[1]: ""
-  ui[2]: ""
-  ui[3]: ""
-  ui[4]: ""
-  ui[5]: ""
-  ui[6]: ""
-  ui[7]: ""
+  ui[0]: "Challenge bit 8"
+  ui[1]: "Challenge bit 9"
+  ui[2]: "Challenge bit 10"
+  ui[3]: "Challenge bit 11"
+  ui[4]: "Challenge bit 12"
+  ui[5]: "Challenge bit 13"
+  ui[6]: "Challenge bit 14"
+  ui[7]: "Challenge bit 15"
 
   # Outputs
   uo[0]: "UART TX (115200 8N1)"
@@ -55,14 +54,14 @@ pinout:
   uo[7]: ""
 
   # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
+  uio[0]: "Challenge bit 0"
+  uio[1]: "Challenge bit 1"
+  uio[2]: "Challenge bit 2"
+  uio[3]: "Challenge bit 3"
+  uio[4]: "Challenge bit 4"
+  uio[5]: "Challenge bit 5"
+  uio[6]: "Challenge bit 6"
+  uio[7]: "Challenge bit 7"
 
 # Do not change!
 yaml_version: 6

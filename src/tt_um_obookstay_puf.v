@@ -4,11 +4,15 @@
 // ============================================================
 // Tiny Tapeout top-level wrapper for the Arbiter PUF project.
 //
-//   ui[0]  : UART RX (115200 8N1, challenge input)
-//   uo[0]  : UART TX (115200 8N1, response output)
+//   ui[7:0] + uio[7:0] : parallel challenge bus
+//       challenge = {ui_in, uio_in}  (ui[7]=bit15 ... uio[0]=bit0).
+//       A bus value DIFFERENT from the previously measured one
+//       starts the next measurement; pulse rst_n to re-measure
+//       the same challenge.
+//   uo[0]  : UART TX (115200 8N1, response = 4 hex chars)
 //   uo[1]  : LED R  (measurement in progress)
 //   uo[2]  : LED G  (race activity / sending)
-//   uo[3]  : LED B  (waiting for challenge)
+//   uo[3]  : LED B  (waiting for a new challenge)
 //
 // The `ena` input gates the internal reset so the design stays in
 // reset until the project is selected on the chip.
@@ -30,8 +34,8 @@ module tt_um_obookstay_puf (
 `endif
 );
 
-    wire uart_tx;
-    wire uart_rx = ui_in[0];
+    wire        uart_tx;
+    wire [15:0] challenge_bus = {ui_in, uio_in};
     wire led_r, led_g, led_b;
     wire rst_int = rst_n & ena;
 
@@ -39,7 +43,7 @@ module tt_um_obookstay_puf (
         .clk     (clk),
         .rst_n   (rst_int),
         .uart_tx (uart_tx),
-        .uart_rx (uart_rx),
+        .challenge_bus (challenge_bus),
         .led_r   (led_r),
         .led_g   (led_g),
         .led_b   (led_b)

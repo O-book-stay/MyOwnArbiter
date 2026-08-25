@@ -2,17 +2,21 @@
 `default_nettype none
 
 // ============================================================
-// Self-checking UART smoke testbench (no cocotb dependency).
+// Self-checking smoke testbench (no cocotb dependency).
 //
-// Mirrors test/test.py: 8-hex-char challenge in, 8-hex-char
-// response out, two rounds, responses must differ. Bit timing is
-// cycle-exact (416 clocks/bit like BIT_PERIOD in puf_defines.v).
+// Protocol: the 16-bit parallel challenge bus {ui_in, uio_in}
+// drives one measurement per DISTINCT bus value; the 16-bit
+// response goes out as 4 hex chars on uo[0] (UART 115200 8N1).
+// Two rounds with different challenges must both complete and
+// produce different responses.  UART bit timing is cycle-exact
+// (416 clocks/bit like BIT_PERIOD in puf_defines.v).
+//
 // Run with iverilog:
 //   iverilog -g2012 -s tb_smoke -I../src tb_smoke.v \
 //     ../src/puf_defines.v ../src/arb_mux.v ../src/arbiter_chain.v \
 //     ../src/arbiter_cell.v ../src/puf_top.v \
-//     ../src/puf_controller.v ../src/lfsr.v ../src/uart_rx.v \
-//     ../src/uart_tx.v ../src/tt_um_obookstay_puf.v \
+//     ../src/puf_controller.v ../src/lfsr.v ../src/uart_tx.v \
+//     ../src/tt_um_obookstay_puf.v \
 //     ../src/macro/arbchain.v && vvp a.out
 // ============================================================
 
@@ -21,13 +25,15 @@ module tb_smoke;
   always #10 clk = ~clk;  // 50 MHz (bit times are counted in cycles)
 
   reg rst_n = 1'b0;
-  reg [7:0] ui_in = 8'hFF;  // UART RX idle high
+  reg [15:0] challenge = 16'h0000;
+  wire [7:0] ui_in  = challenge[15:8];
+  wire [7:0] uio_in = challenge[7:0];
   wire [7:0] uo_out, uio_out, uio_oe;
 
   tt_um_obookstay_puf dut (
       .ui_in  (ui_in),
       .uo_out (uo_out),
-      .uio_in (8'h00),
+      .uio_in (uio_in),
       .uio_out(uio_out),
       .uio_oe (uio_oe),
       .ena    (1'b1),
@@ -38,20 +44,7 @@ module tb_smoke;
   localparam integer BIT_NS  = 8320;  // 416 cycles x 20 ns
   localparam integer HALF_NS = 4160;
   localparam integer GAP_NS  = 1280;  // inter-byte idle gap
-
-  task send_byte(input [7:0] d);
-    integer b;
-    begin
-      ui_in[0] = 1'b0;  // start bit
-      #(BIT_NS);
-      for (b = 0; b < 8; b = b + 1) begin
-        ui_in[0] = d[b];
-        #(BIT_NS);
-      end
-      ui_in[0] = 1'b1;  // stop bit + gap
-      #(BIT_NS + GAP_NS);
-    end
-  endtask
+  localparam integer NBYTES  = 4;     // RESP_BITS / 4
 
   task recv_byte(output [7:0] d);
     integer b, waited;
@@ -62,7 +55,7 @@ module tb_smoke;
         #(1000);
         waited = waited + 1000;
         if (waited > 60_000_000) begin
-          $display("FAIL: RX start-bit timeout");
+          $display("FAIL: TX start-bit timeout");
           $finish;
         end
       end
@@ -75,32 +68,30 @@ module tb_smoke;
     end
   endtask
 
-  task wait_blue;  // led_b (uo[3]) high = waiting for a challenge
-    integer waited;
-    begin
-      waited = 0;
-      while (uo_out[3] !== 1'b1) begin
-        #(1000);
-        waited = waited + 1000;
-        if (waited > 60_000_000) begin
-          $display("FAIL: led_b wait timeout");
-          $finish;
-        end
-      end
-    end
-  endtask
-
   function is_hex(input [7:0] c);
     is_hex = ((c >= "0" && c <= "9") || (c >= "A" && c <= "F") ||
               (c >= "a" && c <= "f"));
   endfunction
 
-  reg [63:0] ch_a = 64'h3031323334353637;  // "01234567"
-  reg [63:0] ch_b = 64'h3736353433323130;  // "76543210"
-  reg [7:0]  r1 [0:7];
-  reg [7:0]  r2 [0:7];
-  reg [63:0] s1, s2;
-  integer i, diff;
+  // One measurement round: wait for the 4-char response.
+  task recv_response(output [31:0] resp);
+    reg [7:0] r;
+    integer i;
+    begin
+      resp = 32'h0;
+      for (i = 0; i < NBYTES; i = i + 1) begin
+        recv_byte(r);
+        if (!is_hex(r)) begin
+          $display("FAIL: response byte %0d = 0x%02x not hex", i, r);
+          $finish;
+        end
+        resp = {resp[23:0], r};
+      end
+    end
+  endtask
+
+  reg [31:0] s1, s2;
+  integer diff;
 
   initial begin
     $dumpfile("tb_smoke.fst");
@@ -108,52 +99,28 @@ module tb_smoke;
   end
 
   initial begin
-    #200_000_000;  // global watchdog
+    #50_000_000;  // global watchdog
     $display("FAIL: global watchdog timeout");
     $finish;
   end
 
   initial begin
+    // Round 1: drive challenge A before releasing reset; the first
+    // round after reset fires on any bus value.
+    challenge = 16'hA5C3;
     #200;
     rst_n = 1'b1;
-    #200;
+    recv_response(s1);
+    $display("TB: round1 response = %08x (challenge A5C3)", s1);
 
-    wait_blue;
-    $display("TB: waiting for challenge (led_b=1)");
+    // Round 2: change the bus -> the controller detects the new
+    // value and starts the next measurement automatically.
+    challenge = 16'h3C5A;
+    recv_response(s2);
+    $display("TB: round2 response = %08x (challenge 3C5A)", s2);
 
-    // Round 1
-    for (i = 0; i < 8; i = i + 1) send_byte(ch_a[63 - i*8 -: 8]);
-    s1 = 64'h0;
-    for (i = 0; i < 8; i = i + 1) begin
-      recv_byte(r1[i]);
-      if (!is_hex(r1[i])) begin
-        $display("FAIL: round1 byte %0d = 0x%02x not hex", i, r1[i]);
-        $finish;
-      end
-      s1 = {s1[55:0], r1[i]};
-    end
-    $display("TB: round1 response = %0s", s1);
-
-    // Round 2
-    wait_blue;
-    for (i = 0; i < 8; i = i + 1) send_byte(ch_b[63 - i*8 -: 8]);
-    s2 = 64'h0;
-    for (i = 0; i < 8; i = i + 1) begin
-      recv_byte(r2[i]);
-      if (!is_hex(r2[i])) begin
-        $display("FAIL: round2 byte %0d = 0x%02x not hex", i, r2[i]);
-        $finish;
-      end
-      s2 = {s2[55:0], r2[i]};
-    end
-    $display("TB: round2 response = %0s", s2);
-
-    diff = 0;
-    for (i = 0; i < 8; i = i + 1)
-      if (r1[i] !== r2[i]) diff = diff + 1;
-
-    if (diff == 0) $display("FAIL: responses identical");
-    else           $display("PASS: two rounds completed, responses differ in %0d/8 chars", diff);
+    if (s1 === s2) $display("FAIL: responses identical");
+    else           $display("PASS: two rounds completed, responses differ");
     $finish;
   end
 endmodule
