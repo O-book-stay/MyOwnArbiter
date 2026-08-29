@@ -14,8 +14,8 @@ module puf_top (
     output wire     led_b
 `ifdef USE_POWER_PINS
     ,
-    input  wire     VPWR,
-    input  wire     VGND
+    inout  wire     VPWR,
+    inout  wire     VGND
 `endif
 );
 

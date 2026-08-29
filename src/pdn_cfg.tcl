@@ -1,20 +1,36 @@
-# Custom PDN configuration for the arbchain macro power connection.
+# =====================================================================
+# Custom PDN configuration – arbchain macro power connection
 #
-# Identical to the LibreLane default pdn_cfg.tcl except for the macro
-# grid connect: the arbchain macro exposes its VPWR/VGND pins as met2
-# top-band rails, so the via towers to the met4 straps must be built
-# between met2 and met4 (the default met4<->met5 rule would leave the
-# macro grid empty with PDN_MULTILAYER=0 and fail with PDN-0232/0233).
+# 核心策略（第五版，绕开 pdngen 不给 macro pin 打 via4 的限制）：
+#   1. 在 met4（PDN_VERTICAL_LAYER）加两根 custom strap，x 位置恰好
+#      与 macro 的 VPWR/VGND met4 pin 重叠 → 同层同网自动 merge。
+#   2. 在 met5（PDN_HORIZONTAL_LAYER）加两根 custom strap，y 位置覆盖
+#      pin 中心 → 与上述 met4 strap 交叉。
+#   3. add_pdn_connect "met4 met5" 让 pdngen 在交叉点打 via4。
+#   4. 最终电流路径：macro met4 pin ←same layer merge→ custom met4 strap
+#      ←via4→ custom met5 strap ←via4→ regular met4 strap → 汇入主 grid。
+#
+# 关键修复:
+#   [Fix 1] global_connect 使 iterm 逻辑连上 net
+#   [Fix 2] offset snap 到 0.005um 制造格点
+#   [Fix 5] met4 strap 同层 merge（不依赖 pdngen 给 pin 打 via）
+# =====================================================================
 
 source $::env(SCRIPTS_DIR)/openroad/common/io.tcl
 source $::env(SCRIPTS_DIR)/openroad/common/set_global_connections.tcl
 set_global_connections
 
+# [Fix 1] 显式连接 macro PG iterm
+add_global_connection -net $::env(VDD_NET) \
+    -inst_pattern {u_puf_top\.u_chain} -pin_pattern {^VPWR$} -power
+add_global_connection -net $::env(GND_NET) \
+    -inst_pattern {u_puf_top\.u_chain} -pin_pattern {^VGND$} -ground
+global_connect
+
 set secondary []
 foreach vdd $::env(VDD_NETS) gnd $::env(GND_NETS) {
     if { $vdd != $::env(VDD_NET)} {
         lappend secondary $vdd
-
         set db_net [[ord::get_db_block] findNet $vdd]
         if {$db_net == "NULL"} {
             set net [odb::dbNet_create [ord::get_db_block] $vdd]
@@ -22,10 +38,8 @@ foreach vdd $::env(VDD_NETS) gnd $::env(GND_NETS) {
             $net setSigType "POWER"
         }
     }
-
     if { $gnd != $::env(GND_NET)} {
         lappend secondary $gnd
-
         set db_net [[ord::get_db_block] findNet $gnd]
         if {$db_net == "NULL"} {
             set net [odb::dbNet_create [ord::get_db_block] $gnd]
@@ -55,6 +69,7 @@ if { $::env(PDN_MULTILAYER) == 1 } {
     append_if_equals arg_list PDN_EXTEND_TO "core_ring" -extend_to_core_ring
     append_if_equals arg_list PDN_EXTEND_TO "boundary" -extend_to_boundary
 
+    # ---- 标准 met4 vertical straps ----
     add_pdn_stripe \
         -grid stdcell_grid \
         -layer $::env(PDN_VERTICAL_LAYER) \
@@ -65,6 +80,7 @@ if { $::env(PDN_MULTILAYER) == 1 } {
         -starts_with POWER \
         {*}$arg_list
 
+    # ---- 标准 met5 horizontal straps ----
     add_pdn_stripe \
         -grid stdcell_grid \
         -layer $::env(PDN_HORIZONTAL_LAYER) \
@@ -74,6 +90,91 @@ if { $::env(PDN_MULTILAYER) == 1 } {
         -spacing $::env(PDN_HSPACING) \
         -starts_with POWER \
         {*}$arg_list
+
+    # =================================================================
+    # [Fix 5] Custom straps for arbchain macro PG connection
+    #
+    # After W orientation at (40, 30):
+    #   VPWR met4 pin global bbox: (40.000, 39.580)-(41.400, 42.845)
+    #     → strap center x = 40.700, width = 1.4
+    #   VGND met4 pin global bbox: (42.350, 30.000)-(44.220, 31.725)
+    #     → strap center x = 42.750, width = 0.8
+    #       (shifted left to avoid met4 OBS starting at x=43.54)
+    #
+    # Also add met5 straps at pin Y centers for via4 landing.
+    # =================================================================
+    set blk  [ord::get_db_block]
+    set inst [$blk findInst u_puf_top.u_chain]
+
+    if { $inst != "NULL" } {
+        set bb   [$inst getBBox]
+        set upm  [[ord::get_db_tech] getDbUnitsPerMicron]
+        set mx   [expr {[$bb xMin] / double($upm)}]
+        set my   [expr {[$bb yMin] / double($upm)}]
+
+        # Core area origin
+        if { [catch {set cx [expr {[[$blk getCoreArea] xMin] / double($upm)}]}] } {
+            set cx [expr {[[$blk getDieArea] xMin] / double($upm)}]
+        }
+        if { [catch {set cy [expr {[[$blk getCoreArea] yMin] / double($upm)}]}] } {
+            set cy [expr {[[$blk getDieArea] yMin] / double($upm)}]
+        }
+
+        set mfg 0.005
+
+        # --- Custom met4 vertical straps (same-layer merge with pin) ---
+        # VPWR: x_center = mx + (78.680 - (77.280+78.680)/2) = mx + 0.700
+        set vpwr_x [expr {round(($mx + 0.700 - $cx) / $mfg) * $mfg}]
+        # VGND: x_center = mx + (78.680 - (74.460+76.330)/2) = mx + 3.285
+        #   shifted left to 42.75 to avoid OBS → offset = mx+2.750
+        set vgnd_x [expr {round(($mx + 2.750 - $cx) / $mfg) * $mfg}]
+
+        add_pdn_stripe \
+            -grid stdcell_grid \
+            -layer $::env(PDN_VERTICAL_LAYER) \
+            -width 1.4 \
+            -pitch 1000 \
+            -spacing 1.4 \
+            -number_of_straps 1 \
+            -offset $vpwr_x \
+            -starts_with POWER
+
+        add_pdn_stripe \
+            -grid stdcell_grid \
+            -layer $::env(PDN_VERTICAL_LAYER) \
+            -width 0.8 \
+            -pitch 1000 \
+            -spacing 0.8 \
+            -number_of_straps 1 \
+            -offset $vgnd_x \
+            -starts_with GROUND
+
+        # --- Custom met5 horizontal straps (via4 landing above pin) ---
+        # VPWR: y_center = my + (9.580+12.845)/2 = my + 11.2125
+        set vpwr_y [expr {round(($my + 11.2125 - $cy) / $mfg) * $mfg}]
+        # VGND: y_center = my + (0.000+1.725)/2 = my + 0.8625
+        set vgnd_y [expr {round(($my + 0.8625 - $cy) / $mfg) * $mfg}]
+
+        add_pdn_stripe \
+            -grid stdcell_grid \
+            -layer $::env(PDN_HORIZONTAL_LAYER) \
+            -width 3.4 \
+            -pitch 1000 \
+            -spacing 3.4 \
+            -number_of_straps 1 \
+            -offset $vpwr_y \
+            -starts_with POWER
+
+        add_pdn_stripe \
+            -grid stdcell_grid \
+            -layer $::env(PDN_HORIZONTAL_LAYER) \
+            -width 2.0 \
+            -pitch 1000 \
+            -spacing 2.0 \
+            -number_of_straps 1 \
+            -offset $vgnd_y \
+            -starts_with GROUND
+    }
 
     add_pdn_connect \
         -grid stdcell_grid \
@@ -106,7 +207,6 @@ if { $::env(PDN_MULTILAYER) == 1 } {
         {*}$arg_list
 }
 
-# Adds the standard cell rails if enabled.
 if { $::env(PDN_ENABLE_RAILS) == 1 } {
     add_pdn_stripe \
         -grid stdcell_grid \
@@ -119,7 +219,6 @@ if { $::env(PDN_ENABLE_RAILS) == 1 } {
         -layers "$::env(PDN_RAIL_LAYER) $::env(PDN_VERTICAL_LAYER)"
 }
 
-# Adds the core ring if enabled.
 if { $::env(PDN_CORE_RING) == 1 } {
     if { $::env(PDN_MULTILAYER) == 1 } {
         set arg_list [list]
@@ -168,19 +267,3 @@ if { $::env(PDN_CORE_RING) == 1 } {
         throw APPLICATION "PDN_CORE_RING cannot be used when PDN_MULTILAYER is set to false."
     }
 }
-
-define_pdn_grid \
-    -macro \
-    -default \
-    -name macro \
-    -starts_with POWER \
-    -halo "$::env(PDN_HORIZONTAL_HALO) $::env(PDN_VERTICAL_HALO)"
-
-# arbchain: VPWR pin is a met2 rail, VGND pin a met1 rail; both are
-# crossed by the met4 straps at the corridor
-add_pdn_connect \
-    -grid macro \
-    -layers "met2 $::env(PDN_VERTICAL_LAYER)"
-add_pdn_connect \
-    -grid macro \
-    -layers "met1 $::env(PDN_VERTICAL_LAYER)"

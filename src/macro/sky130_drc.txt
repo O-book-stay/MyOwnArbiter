@@ -5,6 +5,30 @@
  <generator>drc: script='//wsl.localhost/Ubuntu-24.04/home/obooky/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.tech/klayout\\drc\\sky130A.lydrc'</generator>
  <top-cell>arbchain</top-cell>
  <tags>
+  <tag>
+   <name>waived</name>
+   <description/>
+  </tag>
+  <tag>
+   <name>red</name>
+   <description/>
+  </tag>
+  <tag>
+   <name>green</name>
+   <description/>
+  </tag>
+  <tag>
+   <name>blue</name>
+   <description/>
+  </tag>
+  <tag>
+   <name>yellow</name>
+   <description/>
+  </tag>
+  <tag>
+   <name>important</name>
+   <description/>
+  </tag>
  </tags>
  <categories>
   <category>
@@ -886,413 +910,102 @@
    <references>
    </references>
   </cell>
-  <cell>
-   <name>sky130_fd_sc_hd__mux2_1</name>
-   <variant/>
-   <layout-name>sky130_fd_sc_hd__mux2_1</layout-name>
-   <references>
-    <ref>
-     <parent>arbchain</parent>
-     <trans>r0 *1 0,0.24</trans>
-    </ref>
-   </references>
-  </cell>
  </cells>
  <items>
   <item>
    <tags/>
-   <category>'ct.2'</category>
+   <category>'m3.3ab'</category>
    <cell>arbchain</cell>
    <visited>false</visited>
    <multiplicity>1</multiplicity>
    <comment/>
    <image/>
    <values>
-    <value>edge-pair: (1.9,34.905;2.035,34.905)|(2.12,35.075;1.985,35.075)</value>
+    <value>edge-pair: (2.4,76.34;2.4,77.28)/(2.4,77.04;2.4,76.74)</value>
    </values>
   </item>
   <item>
    <tags/>
-   <category>'ct.2'</category>
+   <category>'m3.3ab'</category>
    <cell>arbchain</cell>
    <visited>false</visited>
    <multiplicity>1</multiplicity>
    <comment/>
    <image/>
    <values>
-    <value>edge-pair: (9.245,30.305;9.38,30.305)|(9.295,30.475;9.16,30.475)</value>
+    <value>edge-pair: (9.18,77.28;10.605,77.28)/(11.005,77.28;9.58,77.28)</value>
    </values>
   </item>
   <item>
    <tags/>
-   <category>'ct.2'</category>
+   <category>'m3.3ab'</category>
    <cell>arbchain</cell>
    <visited>false</visited>
    <multiplicity>1</multiplicity>
    <comment/>
    <image/>
    <values>
-    <value>edge-pair: (1.9,39.505;2.035,39.505)|(2.12,39.675;1.985,39.675)</value>
+    <value>edge-pair: (10.605,76.371;10.605,74.179)/(10.89,74.46;10.89,76.09)</value>
    </values>
   </item>
   <item>
    <tags/>
-   <category>'ct.2'</category>
+   <category>'m3.3ab'</category>
    <cell>arbchain</cell>
    <visited>false</visited>
    <multiplicity>1</multiplicity>
    <comment/>
    <image/>
    <values>
-    <value>edge-pair: (1.9,44.105;2.035,44.105)|(2.12,44.275;1.985,44.275)</value>
+    <value>edge-pair: (10.605,76.79;10.605,75.69)/(10.605,76.09;10.605,76.39)</value>
    </values>
   </item>
   <item>
    <tags/>
-   <category>'ct.2'</category>
+   <category>'m4.5ab'</category>
    <cell>arbchain</cell>
    <visited>false</visited>
    <multiplicity>1</multiplicity>
    <comment/>
    <image/>
    <values>
-    <value>edge-pair: (1.9,25.705;2.035,25.705)|(2.12,25.875;1.985,25.875)</value>
+    <value>edge-pair: (11.28,75.14;11.28,74.234)/(11.61,74.46;11.61,75.366)</value>
    </values>
   </item>
   <item>
    <tags/>
-   <category>'ct.2'</category>
+   <category>'m4.5ab'</category>
    <cell>arbchain</cell>
    <visited>false</visited>
    <multiplicity>1</multiplicity>
    <comment/>
    <image/>
    <values>
-    <value>edge-pair: (9.245,44.105;9.38,44.105)|(9.295,44.275;9.16,44.275)</value>
+    <value>edge-pair: (11.28,71.96;10.385,71.96)/(10.785,71.96;11.185,71.96)</value>
    </values>
   </item>
   <item>
    <tags/>
-   <category>'ct.2'</category>
+   <category>'m4.5ab'</category>
    <cell>arbchain</cell>
    <visited>false</visited>
    <multiplicity>1</multiplicity>
    <comment/>
    <image/>
    <values>
-    <value>edge-pair: (9.245,11.905;9.38,11.905)|(9.295,12.075;9.16,12.075)</value>
+    <value>edge-pair: (10.601,70.6;11.175,70.6)/(11.185,70.955;10.785,70.955)</value>
    </values>
   </item>
   <item>
    <tags/>
-   <category>'ct.2'</category>
+   <category>'m4.5ab'</category>
    <cell>arbchain</cell>
    <visited>false</visited>
    <multiplicity>1</multiplicity>
    <comment/>
    <image/>
    <values>
-    <value>edge-pair: (9.245,39.505;9.38,39.505)|(9.295,39.675;9.16,39.675)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (1.9,48.705;2.035,48.705)|(2.12,48.875;1.985,48.875)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (9.245,53.305;9.38,53.305)|(9.295,53.475;9.16,53.475)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (9.245,48.705;9.38,48.705)|(9.295,48.875;9.16,48.875)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (1.9,67.105;2.035,67.105)|(2.12,67.275;1.985,67.275)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (1.9,53.305;2.035,53.305)|(2.12,53.475;1.985,53.475)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (1.9,57.905;2.035,57.905)|(2.12,58.075;1.985,58.075)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (9.245,67.105;9.38,67.105)|(9.295,67.275;9.16,67.275)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (9.245,16.505;9.38,16.505)|(9.295,16.675;9.16,16.675)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (1.9,62.505;2.035,62.505)|(2.12,62.675;1.985,62.675)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (9.245,62.505;9.38,62.505)|(9.295,62.675;9.16,62.675)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (1.9,71.705;2.035,71.705)|(2.12,71.875;1.985,71.875)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (1.9,2.705;2.035,2.705)|(2.12,2.875;1.985,2.875)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (9.245,25.705;9.38,25.705)|(9.295,25.875;9.16,25.875)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (9.245,71.705;9.38,71.705)|(9.295,71.875;9.16,71.875)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (9.245,2.705;9.38,2.705)|(9.295,2.875;9.16,2.875)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (9.245,7.305;9.38,7.305)|(9.295,7.475;9.16,7.475)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (9.245,57.905;9.38,57.905)|(9.295,58.075;9.16,58.075)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (1.9,30.305;2.035,30.305)|(2.12,30.475;1.985,30.475)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (9.245,34.905;9.38,34.905)|(9.295,35.075;9.16,35.075)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (9.245,21.105;9.38,21.105)|(9.295,21.275;9.16,21.275)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (1.9,11.905;2.035,11.905)|(2.12,12.075;1.985,12.075)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (1.9,16.505;2.035,16.505)|(2.12,16.675;1.985,16.675)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (1.9,7.305;2.035,7.305)|(2.12,7.475;1.985,7.475)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (1.9,21.105;2.035,21.105)|(2.12,21.275;1.985,21.275)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'ct.2'</category>
-   <cell>sky130_fd_sc_hd__mux2_1</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (1.9,2.465;2.035,2.465)|(2.12,2.635;1.985,2.635)</value>
+    <value>edge-pair: (0.905,3.245;0,3.245)/(0.105,3.245;0.505,3.245)</value>
    </values>
   </item>
  </items>

@@ -29,8 +29,8 @@ module tt_um_obookstay_puf (
     input  wire       rst_n      // not reset
 `ifdef USE_POWER_PINS
     ,
-    input  wire       VPWR,
-    input  wire       VGND
+    inout  wire       VPWR,
+    inout  wire       VGND
 `endif
 );
 
