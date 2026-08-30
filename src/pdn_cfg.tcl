@@ -1,28 +1,28 @@
 # =====================================================================
-#  pdn_cfg.tcl — tt_um_obookstay_puf  (修复 PDN-0232/0233)
+#  pdn_cfg.tcl — tt_um_obookstay_puf  (met4-only, geometry-driven)
 #
-#  核心修复：
-#   1. core grid strap 强制 -extend_to_boundary，确保覆盖 macro
-#   2. macro grid 自带 met4/met5 strap，避免 InstanceGrid 报空
-#   3. macro 内部 met4 strap 连接 pin，再 via4 连 met5，再与 core met5 同层合并
+#  TT precheck forbids met5 entirely on sky130A (tt/precheck/tech_data.py:
+#  forbidden_layers = met5.drawing/pin/label; power pins must be met4),
+#  so this PDN is met4-only: vertical met4 straps + met1 followpins.
+#
+#  The arbchain macro exposes VPWR/VGND as full-width met4 stripes
+#  (arbchain.lef), so a strap overlapping them connects by same-layer
+#  abutment — no vias, no met5.
+#
+#  The "targeted" strap pair is placed by reading the macro's actual
+#  ITerm bboxes from odb, so it survives re-placement / re-orientation
+#  as long as the PG pins stay on met4.  Distribution straps are kept
+#  >= 0.3 um (met4 spacing) clear of the targeted pair.
+#
+#  Verification: after harden, run check_pdn_def.py against the final
+#  DEF (asserts strap positions/nets and zero met5).
 # =====================================================================
 
 source $::env(SCRIPTS_DIR)/openroad/common/io.tcl
 source $::env(SCRIPTS_DIR)/openroad/common/set_global_connections.tcl
 set_global_connections
 
-# ==========================================================
-#  1. Macro PG 逻辑连接（必须先于 grid 定义）
-# ==========================================================
-add_global_connection -net $::env(VDD_NET) \
-    -inst_pattern {u_puf_top\.u_chain} -pin_pattern {^VPWR$} -power
-add_global_connection -net $::env(GND_NET) \
-    -inst_pattern {u_puf_top\.u_chain} -pin_pattern {^VGND$} -ground
-global_connect
-
-# ==========================================================
-#  2. Secondary power nets
-# ==========================================================
+# ---- secondary power nets (stock boilerplate) -----------------------
 set secondary []
 foreach vdd $::env(VDD_NETS) gnd $::env(GND_NETS) {
     if { $vdd != $::env(VDD_NET)} {
@@ -48,76 +48,192 @@ foreach vdd $::env(VDD_NETS) gnd $::env(GND_NETS) {
 set_voltage_domain -name CORE -power $::env(VDD_NET) -ground $::env(GND_NET) \
     -secondary_power $secondary
 
-# ==========================================================
-#  3. Core Grid
-# ==========================================================
+# ---- safety: this script implements the met4-only TT topology -------
 if { $::env(PDN_MULTILAYER) == 1 } {
-
-    set arg_list [list]
-    if { $::env(PDN_ENABLE_PINS) } {
-        lappend arg_list -pins "$::env(PDN_VERTICAL_LAYER) $::env(PDN_HORIZONTAL_LAYER)"
-    }
-
-    define_pdn_grid \
-        -name stdcell_grid \
-        -starts_with POWER \
-        -voltage_domain CORE \
-        {*}$arg_list
-
-    # ---- met4 vertical straps（强制 extend_to_boundary 覆盖 macro）----
-    add_pdn_stripe \
-        -grid stdcell_grid \
-        -layer $::env(PDN_VERTICAL_LAYER) \
-        -width $::env(PDN_VWIDTH) \
-        -pitch $::env(PDN_VPITCH) \
-        -offset $::env(PDN_VOFFSET) \
-        -spacing $::env(PDN_VSPACING) \
-        -starts_with POWER \
-        -extend_to_boundary
-
-    # ---- met5 horizontal straps（强制 extend_to_boundary 覆盖 macro）----
-    add_pdn_stripe \
-        -grid stdcell_grid \
-        -layer $::env(PDN_HORIZONTAL_LAYER) \
-        -width $::env(PDN_HWIDTH) \
-        -pitch $::env(PDN_HPITCH) \
-        -offset $::env(PDN_HOFFSET) \
-        -spacing $::env(PDN_HSPACING) \
-        -starts_with POWER \
-        -extend_to_boundary
-
-    # ---- core: met4 ↔ met5 ----
-    add_pdn_connect \
-        -grid stdcell_grid \
-        -layers "$::env(PDN_VERTICAL_LAYER) $::env(PDN_HORIZONTAL_LAYER)"
-
-} else {
-
-    set arg_list [list]
-    if { $::env(PDN_ENABLE_PINS) } {
-        lappend arg_list -pins "$::env(PDN_VERTICAL_LAYER)"
-    }
-
-    define_pdn_grid \
-        -name stdcell_grid \
-        -starts_with POWER \
-        -voltage_domain CORE \
-        {*}$arg_list
-
-    add_pdn_stripe \
-        -grid stdcell_grid \
-        -layer $::env(PDN_VERTICAL_LAYER) \
-        -width $::env(PDN_VWIDTH) \
-        -pitch $::env(PDN_VPITCH) \
-        -offset $::env(PDN_VOFFSET) \
-        -spacing $::env(PDN_VSPACING) \
-        -starts_with POWER \
-        -extend_to_boundary
+    throw APPLICATION "pdn_cfg.tcl: set FP_PDN_MULTILAYER to 0 — met5 is forbidden by the TT precheck"
+}
+if { $::env(PDN_VERTICAL_LAYER) != "met4" } {
+    throw APPLICATION "pdn_cfg.tcl: expected PDN_VERTICAL_LAYER=met4, got '$::env(PDN_VERTICAL_LAYER)'"
 }
 
-# ==========================================================
-#  4. Standard-cell followpin rails
-# ==========================================================
+# ---- read macro PG pin bboxes (die coords, um) ----------------------
+set block [ord::get_db_block]
+set core  [$block getCoreArea]
+set core_llx [ord::dbu_to_microns [$core xMin]]
+set core_urx [ord::dbu_to_microns [$core xMax]]
+
+proc pg_pin_bbox { inst_name pin_name } {
+    set inst [[ord::get_db_block] findInst $inst_name]
+    if { $inst == "NULL" } {
+        throw APPLICATION "pdn_cfg.tcl: instance $inst_name not found"
+    }
+    set iterm [$inst findITerm $pin_name]
+    if { $iterm == "NULL" } {
+        throw APPLICATION "pdn_cfg.tcl: pin $pin_name not found on $inst_name"
+    }
+    set bbox [$iterm getBBox]
+    return [list \
+        [ord::dbu_to_microns [$bbox xMin]] \
+        [ord::dbu_to_microns [$bbox yMin]] \
+        [ord::dbu_to_microns [$bbox xMax]] \
+        [ord::dbu_to_microns [$bbox yMax]]]
+}
+
+lassign [pg_pin_bbox u_puf_top.u_chain VPWR] v_llx v_lly v_urx v_ury
+lassign [pg_pin_bbox u_puf_top.u_chain VGND] g_llx g_lly g_urx g_ury
+puts "pdn_cfg: VPWR pin bbox (um): $v_llx $v_lly $v_urx $v_ury"
+puts "pdn_cfg: VGND pin bbox (um): $g_llx $g_lly $g_urx $g_ury"
+puts "pdn_cfg: core area x: $core_llx .. $core_urx"
+
+set w_pin [expr {$v_urx - $v_llx}]
+set gap   [expr {$g_llx - $v_urx}]
+if { $w_pin <= 0 || abs(($g_urx - $g_llx) - $w_pin) > 0.01 } {
+    throw APPLICATION "pdn_cfg.tcl: VPWR/VGND pin bands are not equal-width met4 stripes ([expr {$v_urx - $v_llx}] vs [expr {$g_urx - $g_llx}])"
+}
+if { $gap < 0.3 } {
+    throw APPLICATION "pdn_cfg.tcl: VPWR/VGND pin bands too close together (gap $gap um)"
+}
+
+# ---- obstruction bloat of the pins ----------------------------------
+#  pdngen turns every macro PG pin into a same-layer obstruction
+#  bloated by the layer's min spacing (Shape::generateObstruction) and
+#  cuts straps away from it.  The ONLY way a met4 strap survives over
+#  its own pin is Shape::cut's same-net exemption, which requires the
+#  strap to fully span the bloated pin rect across its width axis.
+#  So each targeted strap is wider than the pin by 2 * bloat.
+set bloat 0.4
+if { ![catch {
+    set met4 [[$block getTech] findLayer met4]
+    $met4 getSpacing [expr {round($w_pin * 1000)}] 0
+} sp_dbu] } {
+    if { $sp_dbu > 0 } {
+        set bloat [expr {$sp_dbu / 1000.0 + 0.1}]
+    }
+}
+puts "pdn_cfg: met4 pin obstruction bloat: $bloat um"
+set w_t [expr {$w_pin + 2.0 * $bloat}]                       ;# targeted strap width
+set sp_t [expr {($g_llx - $bloat) - ($v_urx + $bloat)}]      ;# P-to-G edge gap
+if { $sp_t < 0.3 } {
+    throw APPLICATION "pdn_cfg.tcl: targeted straps would violate met4 spacing ($sp_t um)"
+}
+
+set w_reg  $::env(PDN_VWIDTH)
+set sp_reg $::env(PDN_VSPACING)
+set pitch  $::env(PDN_VPITCH)
+
+# ---------------------------------------------------------------------
+#  Core grid: met4 vertical straps only; tile power pins on met4
+# ---------------------------------------------------------------------
+set arg_list [list]
+if { $::env(PDN_ENABLE_PINS) } {
+    lappend arg_list -pins $::env(PDN_VERTICAL_LAYER)
+}
+
+define_pdn_grid \
+    -name stdcell_grid \
+    -starts_with POWER \
+    -voltage_domain CORE \
+    {*}$arg_list
+
+# ---- (1) targeted pair right on the macro PG pin bands --------------
+#  pdngen strap-pair model (Straps::makeStraps): the offset is the
+#  CENTER of the first strap; the second net's strap starts at
+#  center + width + spacing; pitch/number_of_straps count P/G pairs.
+#  One pair: P covers the bloated VPWR band, G the bloated VGND band.
+#  Width = pin + 2*bloat so Shape::cut's same-net exemption fires and
+#  the strap actually lands on the pin.  Asserted post-run by
+#  check_pdn_def.py.
+add_pdn_stripe \
+    -grid stdcell_grid \
+    -layer $::env(PDN_VERTICAL_LAYER) \
+    -width $w_t \
+    -spacing $sp_t \
+    -pitch 1000.0 \
+    -offset [expr {($v_llx + $v_urx) / 2.0 - $core_llx}] \
+    -starts_with POWER \
+    -number_of_straps 1
+
+# ---- (2) west distribution straps -----------------------------------
+#  Keep every strap edge >= bloat + 0.3 um clear of the targeted pair
+#  and of every met4 signal pin of the macro (e.g. "launch": a strap
+#  sitting on top of a pin's x-window traps the pin's access wire).
+#  Pairs: P at off, G at off + width + spacing (left edges).
+set off_w $::env(PDN_VOFFSET)
+set clear_lo [expr {$v_llx - $bloat - 0.3 - $w_reg}]
+set n_west [expr {int(floor(($clear_lo - ($core_llx + $off_w + 2.0 * $w_reg + $sp_reg)) / double($pitch))) + 1}]
+if { $n_west < 1 } { set n_west 1 }
+puts "pdn_cfg: west straps: $n_west pair(s) from core-relative offset $off_w"
+add_pdn_stripe \
+    -grid stdcell_grid \
+    -layer $::env(PDN_VERTICAL_LAYER) \
+    -width $w_reg \
+    -pitch $pitch \
+    -offset $off_w \
+    -spacing $sp_reg \
+    -starts_with POWER \
+    -number_of_straps $n_west
+
+# ---- (3) east distribution straps (fill to the boundary) ------------
+#  Pick an offset whose straps keep clear of every met4 signal pin of
+#  the macro (launch lives at x 121.28..122 here).
+set inst2 [$block findInst u_puf_top.u_chain]
+set master [$inst2 getMaster]
+set win_list {}
+foreach iterm [$inst2 getITerms] {
+    set mterm [$iterm getMTerm]
+    set sig [$mterm getSigType]
+    if { $sig == "POWER" || $sig == "GROUND" } { continue }
+    set has_met4 0
+    foreach mpin [$mterm getMPins] {
+        foreach box [$mpin getGeometry] {
+            if { [[$box getTechLayer] getName] eq "met4" } { set has_met4 1 }
+        }
+    }
+    if { !$has_met4 } { continue }
+    set bb [$iterm getBBox]
+    # expand the pin window by bloat + min spacing so no strap edge
+    # (nor any router via) can squeeze closer than 0.3 um to the pin
+    lappend win_list [list \
+        [expr {[ord::dbu_to_microns [$bb xMin]] - $bloat - 0.3}] \
+        [expr {[ord::dbu_to_microns [$bb xMax]] + $bloat + 0.3}]]
+}
+puts "pdn_cfg: met4 signal-pin windows to avoid: $win_list"
+
+set off_e [expr {$g_urx + $bloat + 0.3 - $core_llx}]
+set chosen 0
+for { set d 0 } { $d < 8.0 } { set d [expr {$d + 0.1}] } {
+    set ok 1
+    for { set c [expr {$g_urx + $bloat + 0.3 + $d}] } { $ok && $c + $w_reg < $core_urx } { set c [expr {$c + $pitch}] } {
+        foreach w $win_list {
+            lassign $w wlo whi
+            # P strap [c-0.8, c+0.8] and G strap [c+3.2-0.8, c+3.2+0.8]
+            foreach cg [list $c [expr {$c + $w_reg + $sp_reg}]] {
+                if { $cg + $w_reg / 2.0 > $wlo && $cg - $w_reg / 2.0 < $whi } {
+                    set ok 0
+                }
+            }
+        }
+    }
+    if { $ok } {
+        set off_e [expr {$g_urx + $bloat + 0.3 + $d - $core_llx}]
+        set chosen 1
+        break
+    }
+}
+if { !$chosen } {
+    throw APPLICATION "pdn_cfg.tcl: no east strap offset clears the macro met4 signal pins"
+}
+puts "pdn_cfg: east straps from core-relative offset $off_e"
+add_pdn_stripe \
+    -grid stdcell_grid \
+    -layer $::env(PDN_VERTICAL_LAYER) \
+    -width $w_reg \
+    -pitch $pitch \
+    -offset $off_e \
+    -spacing $sp_reg \
+    -starts_with POWER
+
+# ---- met1 followpin rails + via stack met1->met4 --------------------
 if { $::env(PDN_ENABLE_RAILS) == 1 } {
     add_pdn_stripe \
         -grid stdcell_grid \
@@ -130,82 +246,11 @@ if { $::env(PDN_ENABLE_RAILS) == 1 } {
         -layers "$::env(PDN_RAIL_LAYER) $::env(PDN_VERTICAL_LAYER)"
 }
 
-# ==========================================================
-#  5. Core ring（可选，保持原样）
-# ==========================================================
-if { $::env(PDN_CORE_RING) == 1 } {
-    if { $::env(PDN_MULTILAYER) == 1 } {
-        set arg_list [list]
-        append_if_flag   arg_list PDN_CORE_RING_ALLOW_OUT_OF_DIE -allow_out_of_die
-        append_if_flag   arg_list PDN_CORE_RING_CONNECT_TO_PADS  -connect_to_pads
-        append_if_equals arg_list PDN_EXTEND_TO "boundary"       -extend_to_boundary
-
-        set pdn_core_vertical_layer   $::env(PDN_VERTICAL_LAYER)
-        set pdn_core_horizontal_layer $::env(PDN_HORIZONTAL_LAYER)
-
-        if { [info exists ::env(PDN_CORE_VERTICAL_LAYER)] } {
-            set pdn_core_vertical_layer $::env(PDN_CORE_VERTICAL_LAYER)
-        }
-        if { [info exists ::env(PDN_CORE_HORIZONTAL_LAYER)] } {
-            set pdn_core_horizontal_layer $::env(PDN_CORE_HORIZONTAL_LAYER)
-        }
-
-        add_pdn_ring \
-            -grid stdcell_grid \
-            -layers  "$pdn_core_vertical_layer $pdn_core_horizontal_layer" \
-            -widths  "$::env(PDN_CORE_RING_VWIDTH) $::env(PDN_CORE_RING_HWIDTH)" \
-            -spacings "$::env(PDN_CORE_RING_VSPACING) $::env(PDN_CORE_RING_HSPACING)" \
-            -core_offset "$::env(PDN_CORE_RING_VOFFSET) $::env(PDN_CORE_RING_HOFFSET)" \
-            {*}$arg_list
-
-        if { [info exists ::env(PDN_CORE_VERTICAL_LAYER)] } {
-            add_pdn_connect -grid stdcell_grid \
-                -layers "$::env(PDN_CORE_VERTICAL_LAYER) $::env(PDN_HORIZONTAL_LAYER)"
-        }
-        if { [info exists ::env(PDN_CORE_HORIZONTAL_LAYER)] } {
-            add_pdn_connect -grid stdcell_grid \
-                -layers "$::env(PDN_CORE_HORIZONTAL_LAYER) $::env(PDN_VERTICAL_LAYER)"
-        }
-        if { [info exists ::env(PDN_CORE_VERTICAL_LAYER)] \
-          && [info exists ::env(PDN_CORE_HORIZONTAL_LAYER)] } {
-            add_pdn_connect -grid stdcell_grid \
-                -layers "$::env(PDN_CORE_VERTICAL_LAYER) $::env(PDN_CORE_HORIZONTAL_LAYER)"
-        }
-    } else {
-        throw APPLICATION "PDN_CORE_RING cannot be used when PDN_MULTILAYER is set to false."
-    }
-}
-
-# ==========================================================
-#  6. ★ Macro Grid — arbchain 电源连接（关键修复区）
-# ==========================================================
-#  原理：
-#   - InstanceGrid 必须自带 strap，否则 PDN-0232/0233
-#   - macro 内部 met4 strap 连接 VPWR/VGND pin
-#   - macro 内部 met5 strap via4 连接 met4 strap
-#   - macro 内部 met5 strap 与 core met5 strap 同层重叠自动合并
-# ==========================================================
-if { $::env(PDN_MULTILAYER) == 1 } {
-
-    define_pdn_grid -macro \
-        -name arbchain_pdn \
-        -instances {u_puf_top.u_chain} \
-        -orient {R0 R90 R180 R270 MX MY MXR90 MYR90} \
-        -grid_over_pg_pins \
-        -starts_with POWER \
-        -halo {0 0}
-
-    # macro 内部 met4 strap（连接 pin）
-    add_pdn_stripe -grid arbchain_pdn \
-        -layer $::env(PDN_VERTICAL_LAYER) \
-        -width 2.0 -pitch 10.0 -offset 0.0 -starts_with POWER
-
-    # macro 内部 met5 strap（连接 met4 strap，并延伸至与 core met5 重叠）
-    add_pdn_stripe -grid arbchain_pdn \
-        -layer $::env(PDN_HORIZONTAL_LAYER) \
-        -width 2.0 -pitch 10.0 -offset 0.0 -starts_with POWER
-
-    # macro 内部 met4 ↔ met5 互连
-    add_pdn_connect -grid arbchain_pdn \
-        -layers "$::env(PDN_VERTICAL_LAYER) $::env(PDN_HORIZONTAL_LAYER)"
-}
+# ---------------------------------------------------------------------
+#  NO InstanceGrid for the macro.  Any instance grid turns the macro's
+#  own met4 PG pins into net-less obstructions that cut met4 straps
+#  (pdngen has no same-layer strap-to-pin contact path at all).
+#  Without an instance grid, the macro's pins enter the core grid's
+#  obstruction set WITH their nets, and the same-net exemption in
+#  Shape::cut keeps the targeted straps alive over the pins.
+# ---------------------------------------------------------------------
