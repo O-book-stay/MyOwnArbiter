@@ -5,30 +5,6 @@
  <generator>drc: script='//wsl.localhost/Ubuntu-24.04/home/obooky/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.tech/klayout\\drc\\sky130A.lydrc'</generator>
  <top-cell>arbchain</top-cell>
  <tags>
-  <tag>
-   <name>waived</name>
-   <description/>
-  </tag>
-  <tag>
-   <name>red</name>
-   <description/>
-  </tag>
-  <tag>
-   <name>green</name>
-   <description/>
-  </tag>
-  <tag>
-   <name>blue</name>
-   <description/>
-  </tag>
-  <tag>
-   <name>yellow</name>
-   <description/>
-  </tag>
-  <tag>
-   <name>important</name>
-   <description/>
-  </tag>
  </tags>
  <categories>
   <category>
@@ -912,65 +888,5 @@
   </cell>
  </cells>
  <items>
-  <item>
-   <tags/>
-   <category>'m3.3ab'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (2.4,76.34;2.4,77.28)/(2.4,77.04;2.4,76.74)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'m3.3ab'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (9.18,77.28;10.605,77.28)/(11.005,77.28;9.58,77.28)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'m3.3ab'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (10.605,76.79;10.605,75.69)/(10.605,76.09;10.605,76.39)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'m4.5ab'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (10.601,70.6;11.175,70.6)/(11.185,70.955;10.785,70.955)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'m4.5ab'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (0.905,3.245;0,3.245)/(0.105,3.245;0.505,3.245)</value>
-   </values>
-  </item>
  </items>
 </report-database>
