@@ -174,56 +174,15 @@ add_pdn_stripe \
     -number_of_straps $n_west
 
 # ---- (3) east distribution straps (fill to the boundary) ------------
-#  Pick an offset whose straps keep clear of every met4 signal pin of
-#  the macro (launch lives at x 121.28..122 here).
+#  Straps may NOT cross the macro: any strap cut by the macro's met4
+#  OBS leaves partial rectangles, and the TT pin check requires EVERY
+#  power port rect to touch both the bottom and the top die edges
+#  (tt/precheck/pin_check.py).  So the east fill starts behind the
+#  macro's east edge instead.
 set inst2 [$block findInst u_puf_top.u_chain]
-set master [$inst2 getMaster]
-set win_list {}
-foreach iterm [$inst2 getITerms] {
-    set mterm [$iterm getMTerm]
-    set sig [$mterm getSigType]
-    if { $sig == "POWER" || $sig == "GROUND" } { continue }
-    set has_met4 0
-    foreach mpin [$mterm getMPins] {
-        foreach box [$mpin getGeometry] {
-            if { [[$box getTechLayer] getName] eq "met4" } { set has_met4 1 }
-        }
-    }
-    if { !$has_met4 } { continue }
-    set bb [$iterm getBBox]
-    # expand the pin window by bloat + min spacing so no strap edge
-    # (nor any router via) can squeeze closer than 0.3 um to the pin
-    lappend win_list [list \
-        [expr {[ord::dbu_to_microns [$bb xMin]] - $bloat - 0.3}] \
-        [expr {[ord::dbu_to_microns [$bb xMax]] + $bloat + 0.3}]]
-}
-puts "pdn_cfg: met4 signal-pin windows to avoid: $win_list"
-
-set off_e [expr {$g_urx + $bloat + 0.3 - $core_llx}]
-set chosen 0
-for { set d 0 } { $d < 8.0 } { set d [expr {$d + 0.1}] } {
-    set ok 1
-    for { set c [expr {$g_urx + $bloat + 0.3 + $d}] } { $ok && $c + $w_reg < $core_urx } { set c [expr {$c + $pitch}] } {
-        foreach w $win_list {
-            lassign $w wlo whi
-            # P strap [c-0.8, c+0.8] and G strap [c+3.2-0.8, c+3.2+0.8]
-            foreach cg [list $c [expr {$c + $w_reg + $sp_reg}]] {
-                if { $cg + $w_reg / 2.0 > $wlo && $cg - $w_reg / 2.0 < $whi } {
-                    set ok 0
-                }
-            }
-        }
-    }
-    if { $ok } {
-        set off_e [expr {$g_urx + $bloat + 0.3 + $d - $core_llx}]
-        set chosen 1
-        break
-    }
-}
-if { !$chosen } {
-    throw APPLICATION "pdn_cfg.tcl: no east strap offset clears the macro met4 signal pins"
-}
-puts "pdn_cfg: east straps from core-relative offset $off_e"
+set macro_urx [ord::dbu_to_microns [[$inst2 getBBox] xMax]]
+set off_e [expr {($macro_urx + $bloat + 0.3 + $w_reg / 2.0) - $core_llx}]
+puts "pdn_cfg: east straps from core-relative offset $off_e (first strap x = [expr {$off_e + $core_llx - $w_reg/2.0}])"
 add_pdn_stripe \
     -grid stdcell_grid \
     -layer $::env(PDN_VERTICAL_LAYER) \
