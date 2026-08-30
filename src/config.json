@@ -21,11 +21,7 @@
       "nl": [
         "dir::macro/arbchain.nl.v"
       ],
-      "lib": {
-        "*_tt_025C_1v80": ["dir::macro/arbchain.lib"],
-        "*_ss_100C_1v60": ["dir::macro/arbchain.lib"],
-        "*_ff_n40C_1v95": ["dir::macro/arbchain.lib"]
-      },
+     
       "spice": [],
       "sdf": {},
       "instances": {
@@ -39,13 +35,11 @@
       }
     }
   },
-  "PDN_CFG": "dir::pdn_cfg.tcl",
-  "PDN_MACRO_CONNECTIONS": [
-    "u_puf_top.u_chain VPWR VGND VPWR VGND"
-  ],
+  
   "PDN_ENABLE_GLOBAL_CONNECTIONS": true,
   "PDN_HORIZONTAL_HALO": 0,
   "PDN_VERTICAL_HALO": 0,
+  "PDN_HOFFSET": 32,
   "FP_MACRO_HORIZONTAL_HALO": 5.0,
   "FP_MACRO_VERTICAL_HALO": 5.0,
   "CLOCK_PORT": "clk",

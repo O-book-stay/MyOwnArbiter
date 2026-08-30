@@ -945,43 +945,7 @@
    <comment/>
    <image/>
    <values>
-    <value>edge-pair: (10.605,76.371;10.605,74.179)/(10.89,74.46;10.89,76.09)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'m3.3ab'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
     <value>edge-pair: (10.605,76.79;10.605,75.69)/(10.605,76.09;10.605,76.39)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'m4.5ab'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (11.28,75.14;11.28,74.234)/(11.61,74.46;11.61,75.366)</value>
-   </values>
-  </item>
-  <item>
-   <tags/>
-   <category>'m4.5ab'</category>
-   <cell>arbchain</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (11.28,71.96;10.385,71.96)/(10.785,71.96;11.185,71.96)</value>
    </values>
   </item>
   <item>
