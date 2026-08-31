@@ -1,4 +1,4 @@
-`include "puf_defines.v"
+`include "cpu_defines.v"
 
 module uart_tx (
     input  wire         clk,

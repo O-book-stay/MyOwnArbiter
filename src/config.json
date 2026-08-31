@@ -7,56 +7,15 @@
   "RUN_LINTER": 1,
   "LINTER_INCLUDE_PDK_MODELS": 1,
   "VERILOG_POWER_DEFINE": "USE_POWER_PINS",
-  "MACROS": {
-    "arbchain": {
-      "gds": [
-        "dir::macro/arbchain.gds"
-      ],
-      "lef": [
-        "dir::macro/arbchain.lef"
-      ],
-      "vh": [
-        "dir::macro/arbchain.vh"
-      ],
-      "nl": [
-        "dir::macro/arbchain.nl.v"
-      ],
-      "lib": {
-        "*_tt_025C_1v80": ["dir::macro/arbchain.lib"],
-        "*_ss_100C_1v60": ["dir::macro/arbchain.lib"],
-        "*_ff_n40C_1v95": ["dir::macro/arbchain.lib"]
-      },
-      "spice": [],
-      "sdf": {},
-      "instances": {
-        "u_puf_top.u_chain": {
-          "location": [
-            83.3,
-            7.2
-          ],
-          "orientation": "N"
-        }
-      }
-    }
-  },
-  "PDN_CFG": "dir::pdn_cfg.tcl",
-  "PDN_HORIZONTAL_HALO": 0.3,
-  "PDN_VERTICAL_HALO": 1.5,
-  "FP_MACRO_HORIZONTAL_HALO": 5.0,
-  "FP_MACRO_VERTICAL_HALO": 5.0,
   "CLOCK_PORT": "clk",
   "RUN_KLAYOUT_XOR": 0,
   "RUN_KLAYOUT_DRC": 0,
-  "DRC_EXCLUDE_CELLS": [
-    "arbchain"
-  ],
   "MAGIC_ZEROIZE_ORIGIN": true,
   "DESIGN_REPAIR_BUFFER_OUTPUT_PORTS": 0,
   "TOP_MARGIN_MULT": 1,
   "BOTTOM_MARGIN_MULT": 1,
   "LEFT_MARGIN_MULT": 6,
   "RIGHT_MARGIN_MULT": 6,
-  "FP_SIZING": "absolute",
   "GRT_ALLOW_CONGESTION": 1,
   "FP_IO_HLENGTH": 2,
   "FP_IO_VLENGTH": 2,

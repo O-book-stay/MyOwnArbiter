@@ -13,15 +13,6 @@ jobs:
         with:
           submodules: recursive
 
-      # Regenerate the symmetric arbiter hard macro (src/macro) from the
-      # pinned skywater-pdk-libs cells, so the committed macro is always
-      # reproducible and matches the exact PDK cell geometry.
-      # - name: Generate arbchain macro
-      #   run: |
-      #     pip install --quiet klayout
-      #     python src/macro/gen_arbchain.py
-      #     python src/macro/check_arbchain.py src/macro/arbchain_routing.json
-
       - name: Build GDS
         uses: TinyTapeout/tt-gds-action@ttsky26c
         with:
