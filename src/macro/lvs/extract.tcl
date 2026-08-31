@@ -32,6 +32,16 @@ if { [llength [info procs read_pdk_spice]] } {
 
 load $::env(DESIGN_NAME) -dereference
 
+# magic only auto-ports global names (VPWR/VGND); promote every
+# top-level label (ch[i], EN, Q, ...) so the interface matches the LEF
+if { [llength [info commands port]] } {
+    if { [catch {port makeall} msg] } {
+        puts "\[WARN\] port makeall failed: $msg"
+    }
+} else {
+    puts "\[WARN\] no port command in this magic build"
+}
+
 file mkdir $::env(EXT_DIR)
 cd $::env(EXT_DIR)
 
@@ -40,7 +50,6 @@ extract no capacitance
 extract no coupling
 extract no resistance
 extract no adjust
-extract unique all
 extract
 
 ext2spice lvs

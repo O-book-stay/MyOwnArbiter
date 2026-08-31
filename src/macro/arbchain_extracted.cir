@@ -1,140 +1,42 @@
-* Extracted by KLayout with SKY130 LVS runset on : 25/08/2026 23:15
+* Extracted by KLayout with SKY130 LVS runset on : 31/08/2026 14:14
 
 .SUBCKT arbchain
-X$1 \$2 \$5 EN EN
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$2 \$2 \$6 EN EN
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$3 \$2 \$67 \$69 \$68 \$65
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__dlrtp_1
-X$4 \$2 \$10 \$4 \$6
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$5 \$2 \$14 \$9 \$11
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$6 \$2 \$18 \$13 \$14
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$7 \$2 \$23 \$17 \$19
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$8 \$2 \$25 \$21 \$23
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$9 \$2 \$30 \$26 \$27
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$10 \$2 \$34 \$29 \$30
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$11 \$2 \$38 \$33 \$35
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$12 \$2 \$42 \$37 \$38
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$13 \$2 \$46 \$41 \$43
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$14 \$2 \$50 \$45 \$46
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$15 \$2 \$65 \$61 \$63
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$16 \$2 \$55 \$49 \$51
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$17 \$2 \$63 \$57 \$59
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$18 \$2 \$58 \$53 \$55
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$19 \$2 \$9 \$6 \$4
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$20 \$2 \$15 \$11 \$9
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$21 \$2 \$66 \$63 \$61
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$22 \$2 \$17 \$14 \$13
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$23 \$2 \$22 \$19 \$17
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$24 \$2 \$62 \$59 \$57
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$25 \$2 \$26 \$23 \$21
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$26 \$2 \$31 \$27 \$26
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$27 \$2 \$57 \$55 \$53
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$28 \$2 \$33 \$30 \$29
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$29 \$2 \$39 \$35 \$33
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$30 \$2 \$54 \$51 \$49
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$31 \$2 \$41 \$38 \$37
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$32 \$2 \$47 \$43 \$41
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
-X$33 \$2 \$49 \$46 \$45
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ ch[0]|ch[10]|ch[11]|ch[12]|ch[13]|ch[14]|ch[15]|ch[1]|ch[2]|ch[3]|ch[4]|ch[5]|ch[6]|ch[7]|ch[8]|ch[9]
-+ sky130_gnd sky130_fd_sc_hd__mux2_1
+X$1 VGND \$4 launch launch ch[0] VPWR \$I125 VGND sky130_fd_sc_hd__mux2_1
+X$2 VGND \$6 launch launch ch[0] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$3 VGND \$12 \$6 \$4 ch[1] VPWR \$I140 VGND sky130_fd_sc_hd__mux2_1
+X$4 VGND \$13 \$4 \$6 ch[1] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$5 VGND arb_rst_n \$121 \$119 \$111 VPWR \$118 VGND sky130_fd_sc_hd__dlrtp_1
+X$6 VGND \$20 \$12 \$13 ch[2] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$7 VGND \$27 \$19 \$20 ch[3] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$8 VGND \$34 \$26 \$27 ch[4] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$9 VGND \$41 \$33 \$34 ch[5] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$10 VGND \$48 \$40 \$41 ch[6] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$11 VGND \$55 \$47 \$48 ch[7] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$12 VGND \$62 \$54 \$55 ch[8] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$13 VGND \$69 \$61 \$62 ch[9] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$14 VGND \$76 \$68 \$69 ch[10] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$15 VGND \$83 \$75 \$76 ch[11] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$16 VGND \$111 \$103 \$104 ch[15] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$17 VGND \$90 \$82 \$83 ch[12] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$18 VGND \$104 \$96 \$97 ch[14] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$19 VGND \$97 \$89 \$90 ch[13] VPWR VPWR VGND sky130_fd_sc_hd__mux2_1
+X$20 VGND \$19 \$13 \$12 ch[2] VPWR \$I139 VGND sky130_fd_sc_hd__mux2_1
+X$21 VGND \$110 \$104 \$103 ch[15] VPWR \$I138 VGND sky130_fd_sc_hd__mux2_1
+X$22 VGND \$26 \$20 \$19 ch[3] VPWR \$I137 VGND sky130_fd_sc_hd__mux2_1
+X$23 VGND \$33 \$27 \$26 ch[4] VPWR \$I136 VGND sky130_fd_sc_hd__mux2_1
+X$24 VGND \$103 \$97 \$96 ch[14] VPWR \$I135 VGND sky130_fd_sc_hd__mux2_1
+X$25 VGND \$40 \$34 \$33 ch[5] VPWR \$I134 VGND sky130_fd_sc_hd__mux2_1
+X$26 VGND \$47 \$41 \$40 ch[6] VPWR \$I133 VGND sky130_fd_sc_hd__mux2_1
+X$27 VGND \$96 \$90 \$89 ch[13] VPWR \$I132 VGND sky130_fd_sc_hd__mux2_1
+X$28 VGND \$54 \$48 \$47 ch[7] VPWR \$I131 VGND sky130_fd_sc_hd__mux2_1
+X$29 VGND \$61 \$55 \$54 ch[8] VPWR \$I130 VGND sky130_fd_sc_hd__mux2_1
+X$30 VGND \$89 \$83 \$82 ch[12] VPWR \$I129 VGND sky130_fd_sc_hd__mux2_1
+X$31 VGND \$68 \$62 \$61 ch[9] VPWR \$I128 VGND sky130_fd_sc_hd__mux2_1
+X$32 VGND \$75 \$69 \$68 ch[10] VPWR \$I127 VGND sky130_fd_sc_hd__mux2_1
+X$33 VGND \$82 \$76 \$75 ch[11] VPWR \$I126 VGND sky130_fd_sc_hd__mux2_1
 .ENDS arbchain
 
-.SUBCKT sky130_fd_sc_hd__dlrtp_1 VGND RESET_B Q GATE D VPWR sky130_gnd
+.SUBCKT sky130_fd_sc_hd__dlrtp_1 VGND RESET_B Q GATE D VPWR VPB sky130_gnd
 M$1 \$6 D VPWR VPB sky130_fd_pr__pfet_01v8_hvt L=0.15 W=0.64 AS=0.1664
 + AD=0.0864 PS=1.8 PD=0.91
 M$2 VPWR \$6 \$18 VPB sky130_fd_pr__pfet_01v8_hvt L=0.15 W=0.64 AS=0.0864
@@ -177,7 +79,7 @@ M$20 VGND \$4 \$5 sky130_gnd sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 AS=0.0567
 + AD=0.1092 PS=0.69 PD=1.36
 .ENDS sky130_fd_sc_hd__dlrtp_1
 
-.SUBCKT sky130_fd_sc_hd__mux2_1 VGND X A1 A0 S VPWR sky130_gnd
+.SUBCKT sky130_fd_sc_hd__mux2_1 VGND X A1 A0 S VPWR VPB sky130_gnd
 M$1 VPWR S \$13 VPB sky130_fd_pr__pfet_01v8_hvt L=0.15 W=0.42 AS=0.15835
 + AD=0.07665 PS=1.395 PD=0.785
 M$2 \$13 A0 \$5 VPB sky130_fd_pr__pfet_01v8_hvt L=0.15 W=0.42 AS=0.07665

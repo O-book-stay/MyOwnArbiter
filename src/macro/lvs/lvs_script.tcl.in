@@ -6,7 +6,7 @@
 #            (src/macro/lvs/gen_arbchain_ref.py, from arbchain.lef + RTL)
 # NO -blackbox: the macro internals are exactly what we want to verify.
 
-set circuit1 [readnet spice @OUT@/arbchain_lvs.spice]
+set circuit1 [readnet spice @OUT@/arbchain_lvs_norm.spice]
 set circuit2 [readnet spice @PDK_SPICE@]
 readnet spice @OUT@/arbchain_ref.spice $circuit2
 

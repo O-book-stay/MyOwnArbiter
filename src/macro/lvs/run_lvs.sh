@@ -40,7 +40,7 @@ echo "PDKPATH=$PDKPATH"
 MOUNTS=(-v "$REPO:$REPO" -v "$PDKROOT:$PDKROOT")
 
 echo
-echo "== [1/3] Magic extraction of arbchain.gds =="
+echo "== [1/4] Magic extraction of arbchain.gds =="
 docker run --rm "${MOUNTS[@]}" \
   -w "$OUT" \
   -e PDK_ROOT="$PDK_ROOT" -e PDKPATH="$PDKPATH" \
@@ -60,22 +60,35 @@ echo "mux2_1:   $(grep -c ' sky130_fd_sc_hd__mux2_1$' "$OUT/arbchain_lvs.spice")
 echo "dlrtp_1:  $(grep -c ' sky130_fd_sc_hd__dlrtp_1$' "$OUT/arbchain_lvs.spice") lines"
 
 echo
-echo "== [2/3] Generate reference (schematic) netlist =="
+echo "== [2/4] Generate reference (schematic) netlist =="
 docker run --rm "${MOUNTS[@]}" \
   -w "$OUT" \
   "$IMG" python3 "$LVS/gen_arbchain_ref.py" \
   -o "$OUT/arbchain_ref.spice" --pdk-spice "$PDK_SPICE" | tee "$OUT/gen_ref.log"
 
 echo
-echo "== [3/3] netgen LVS =="
+echo "== [3/4] Normalize layout labels (EN->launch, Q->q, dangling LEF ports) =="
+docker run --rm "${MOUNTS[@]}" \
+  -w "$OUT" \
+  "$IMG" python3 "$LVS/normalize_layout_spice.py" \
+  "$OUT/arbchain_lvs.spice" "$OUT/arbchain_ref.spice" \
+  "$OUT/arbchain_lvs_norm.spice" | tee "$OUT/normalize.log"
+
+echo
+echo "== [4/4] netgen LVS =="
+: > "$OUT/empty_env.tcl"
 sed -e "s|@OUT@|$OUT|g" \
     -e "s|@PDK_SPICE@|$PDK_SPICE|g" \
     -e "s|@SETUP@|$SCRIPTS_DIR/netgen/setup.tcl|g" \
+    -e "s|@NETGEN_SETUP@|$PDKPATH/libs.tech/netgen/sky130A_setup.tcl|g" \
+    -e "s|@TCL_ENV_IN@|$OUT/empty_env.tcl|g" \
     "$LVS/lvs_script.tcl.in" > "$OUT/lvs_script.tcl"
 
 docker run --rm "${MOUNTS[@]}" \
   -w "$OUT" \
   -e PDK_ROOT="$PDK_ROOT" -e PDKPATH="$PDKPATH" \
+  -e _TCL_ENV_IN="$OUT/empty_env.tcl" \
+  -e NETGEN_SETUP="$PDKPATH/libs.tech/netgen/sky130A_setup.tcl" \
   "$IMG" netgen -batch source "$OUT/lvs_script.tcl" 2>&1 | tee "$OUT/netgen.log"
 grep -q "NETGEN_LVS_SCRIPT_DONE" "$OUT/netgen.log"
 
@@ -84,5 +97,8 @@ if grep -q "Circuits match uniquely" "$OUT/netgen.log"; then
   echo "LVS PASS: Circuits match uniquely  (report: $OUT/lvs.netgen.rpt)"
 else
   echo "LVS FAIL — inspect $OUT/netgen.log and $OUT/lvs.netgen.rpt"
+  docker run --rm "${MOUNTS[@]}" -w "$OUT" \
+    "$IMG" python3 "$LVS/analyze_connectivity.py" \
+    "$OUT/arbchain_lvs_norm.spice" | tee "$OUT/connectivity.rpt" || true
   exit 1
 fi
