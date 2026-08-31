@@ -122,6 +122,8 @@ async def reset(dut):
     """Hold the design in reset, then release it with the clock running."""
     clock = Clock(dut.clk, 20, unit="ns")
     cocotb.start_soon(clock.start())
+    dut.ena.value = 1     # must be driven: tb's reg defaults to X, and X
+                          # would leak through rst_n & ena in gate-level sim
     dut.ui_in.value = 0xFF  # UART RX idle high
     dut.uio_in.value = 0x00
     dut.rst_n.value = 0
