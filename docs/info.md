@@ -1,11 +1,11 @@
 ## How it works
 
 A simple 8-bit accumulator CPU (multi-cycle, custom instruction set) with
-64 bytes of program/data RAM.  Programs are loaded over UART at boot:
+32 bytes of program/data RAM.  Programs are loaded over UART at boot:
 
 ```
 'L' (0x4C)          start loading
-<len> (1 byte)      program length N (1..64)
+<len> (1 byte)      program length N (1..32)
 <N bytes>           program image, written to RAM starting at 0x00
 'R' (0x52)          reset PC to 0 and run
 ```
@@ -21,7 +21,7 @@ program can be loaded the same way.
 ### Instruction set
 
 All instructions are one byte, followed by one operand byte (`imm`/`addr`)
-unless noted.  `mem` is the 64-byte RAM (0x00-0x3F).
+unless noted.  `mem` is the 32-byte RAM (0x00-0x1F).
 
 | Opcode | Instr        | Effect                              | Flags |
 |--------|--------------|-------------------------------------|-------|
@@ -52,7 +52,7 @@ For `SUBI`/`SUBM`, C is set when there is **no** borrow (A >= operand).
 
 | Address | Read                    | Write                       |
 |---------|-------------------------|-----------------------------|
-| 0x00-3F | RAM                     | RAM                         |
+| 0x00-1F | RAM                     | RAM                         |
 | 0xFC    | GPIO output register    | GPIO output register (uio)  |
 | 0xFD    | ui[7:0] input pins      | -                           |
 | 0xFE    | last received UART byte | send byte over UART         |

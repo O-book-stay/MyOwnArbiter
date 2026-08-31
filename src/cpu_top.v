@@ -5,11 +5,11 @@
 // cpu_top -- program RAM + memory-mapped IO + UART boot loader around cpu_core
 //
 // Memory map:
-//   0x00-0x3F  program/data RAM (`RAM_DEPTH bytes, flop based)
+//   0x00-0x1F  program/data RAM (`RAM_DEPTH bytes, flop based)
 //   0xFC       GPIO output register      (drives uio[7:0])
 //   0xFD       read ui[7:0] pins
 //   0xFE       UART data     (write = transmit, read = last RX byte)
-//   0xFF       UART status   (bit0 = RX available, bit1 = TX busy)
+//   0xFF       UART status   (bit0 = TX busy, bit1 = RX available)
 //   other      reads 0, writes ignored
 //
 // Boot protocol on the UART (host -> chip, 115200 8N1):
@@ -132,13 +132,13 @@ module cpu_top (
     // ------------------------------------------------------------------
     // Program/data RAM
     //   * boot loader writes during B_DATA
-    //   * CPU writes while running (addresses 0x00-0x3F)
+    //   * CPU writes while running (addresses 0x00-0x1F)
     //   * contents are NOT initialised: programs must store before load
     // ------------------------------------------------------------------
     reg [7:0] ram [0:`RAM_DEPTH-1];
 
     wire boot_we  = (b_state == B_DATA) && rx_valid;
-    wire cpu_we   = bus_write && (bus_addr[7:6] == 2'b00);
+    wire cpu_we   = bus_write && (bus_addr[7:5] == 3'b000);  // 0x00-0x1F
 
     always @(posedge clk) begin
         if (boot_we)
@@ -177,7 +177,7 @@ module cpu_top (
     // ------------------------------------------------------------------
     reg [7:0] rdata_mux;
     always @* begin
-        if (bus_addr[7:6] == 2'b00)
+        if (bus_addr[7:5] == 3'b000)                       // 0x00-0x1F: RAM
             rdata_mux = ram[bus_addr[`RAM_AW-1:0]];
         else if (bus_addr == `ADDR_GPIO)
             rdata_mux = gpio_reg;

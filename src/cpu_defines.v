@@ -16,9 +16,11 @@
 
 // ---------------------------------------------------------------------------
 // RAM geometry (program + data, loaded over UART at boot)
+// The design targets a 1x2 tile; 32 bytes keeps the flop-based RAM and its
+// read multiplexers within the placement/routing budget.
 // ---------------------------------------------------------------------------
-`define RAM_DEPTH   64
-`define RAM_AW      6                          // address bits (0x00-0x3F)
+`define RAM_DEPTH   32
+`define RAM_AW      5                          // address bits (0x00-0x1F)
 
 // ---------------------------------------------------------------------------
 // Memory-mapped IO (addresses 0xFC-0xFF)
@@ -28,6 +30,9 @@
 `define ADDR_UART_DATA  8'hFE   // W: send byte over UART; R: last RX byte
                                 //      (read clears the "available" flag)
 `define ADDR_UART_STAT  8'hFF   // R: bit0 = TX busy, bit1 = RX byte available
+
+// RAM occupies 0x00-0x1F (`RAM_DEPTH bytes); addresses 0x20-0xFB are
+// unmapped (reads return 0, writes are ignored).
 
 // ---------------------------------------------------------------------------
 // Instruction set (8-bit opcodes; "imm"/"addr" is a second byte)

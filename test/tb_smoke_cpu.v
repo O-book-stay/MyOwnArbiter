@@ -217,25 +217,24 @@ module tb_smoke_cpu;
     end
     wait_led(LED_HALT);     if (task_ok) $display("TB: prog2 halted");
 
-    // ---- Program 3: sum 3+2+1 = 6 into GPIO (31 bytes) -------------
+    // ---- Program 3: sum 3+2+1 = 6 into GPIO (25 bytes) -------------
+    // Data bytes are part of the image: counter at 0x00, sum at 0x01.
     $display("TB: program 3 (loop sum)");
-    prog_image[0]  = `OP_LDI;  prog_image[1]  = 8'h03;   // counter = 3
-    prog_image[2]  = `OP_STD;  prog_image[3]  = 8'h20;
-    prog_image[4]  = `OP_LDI;  prog_image[5]  = 8'h00;   // sum = 0
-    prog_image[6]  = `OP_STD;  prog_image[7]  = 8'h21;
-    prog_image[8]  = `OP_LDD;  prog_image[9]  = 8'h20;   // loop: A = counter
-    prog_image[10] = `OP_JZ;   prog_image[11] = 8'h1A;   // done?
-    prog_image[12] = `OP_LDD;  prog_image[13] = 8'h21;   // A = sum
-    prog_image[14] = `OP_ADDM; prog_image[15] = 8'h20;   // A += counter
-    prog_image[16] = `OP_STD;  prog_image[17] = 8'h21;   // sum = A
-    prog_image[18] = `OP_LDD;  prog_image[19] = 8'h20;   // A = counter
-    prog_image[20] = `OP_SUBI; prog_image[21] = 8'h01;   // counter-1
-    prog_image[22] = `OP_STD;  prog_image[23] = 8'h20;
-    prog_image[24] = `OP_JMP;  prog_image[25] = 8'h08;
-    prog_image[26] = `OP_LDD;  prog_image[27] = 8'h21;      // A = sum
-    prog_image[28] = `OP_STD;  prog_image[29] = `ADDR_GPIO; // GPIO = sum
-    prog_image[30] = `OP_HALT;
-    boot_load(8'd31);
+    prog_image[0]  = 8'h03;                              // counter = 3
+    prog_image[1]  = 8'h00;                              // sum = 0
+    prog_image[2]  = `OP_LDD;  prog_image[3]  = 8'h00;   // loop: A = counter
+    prog_image[4]  = `OP_JZ;   prog_image[5]  = 8'h14;   // done?
+    prog_image[6]  = `OP_LDD;  prog_image[7]  = 8'h01;   // A = sum
+    prog_image[8]  = `OP_ADDM; prog_image[9]  = 8'h00;   // A += counter
+    prog_image[10] = `OP_STD;  prog_image[11] = 8'h01;   // sum = A
+    prog_image[12] = `OP_LDD;  prog_image[13] = 8'h00;   // A = counter
+    prog_image[14] = `OP_SUBI; prog_image[15] = 8'h01;   // counter-1
+    prog_image[16] = `OP_STD;  prog_image[17] = 8'h00;
+    prog_image[18] = `OP_JMP;  prog_image[19] = 8'h02;
+    prog_image[20] = `OP_LDD;  prog_image[21] = 8'h01;      // A = sum
+    prog_image[22] = `OP_STD;  prog_image[23] = `ADDR_GPIO; // GPIO = sum
+    prog_image[24] = `OP_HALT;
+    boot_load(8'd25);
     wait_led(LED_RUN);      // slow enough to catch the RUN phase
     check_gpio(8'h06);      if (task_ok) $display("TB: prog3 GPIO = 0x06 OK");
     wait_led(LED_HALT);     if (task_ok) $display("TB: prog3 halted");
@@ -245,10 +244,10 @@ module tb_smoke_cpu;
     prog_image[0]  = `OP_LDI;    prog_image[1]  = 8'h05;   // A = 5
     prog_image[2]  = `OP_MOV_BA;                          // B = 5
     prog_image[3]  = `OP_LDI;    prog_image[4]  = 8'h00;
-    prog_image[5]  = `OP_STD;    prog_image[6]  = 8'h20;   // mem[0x20] = 0
-    prog_image[7]  = `OP_INC;    prog_image[8]  = 8'h20;   // mem[0x20] = 1
+    prog_image[5]  = `OP_STD;    prog_image[6]  = 8'h1F;   // mem[0x1F] = 0
+    prog_image[7]  = `OP_INC;    prog_image[8]  = 8'h1F;   // mem[0x1F] = 1
     prog_image[9]  = `OP_MOV_AB;                          // A = B = 5
-    prog_image[10] = `OP_SUBM;   prog_image[11] = 8'h20;   // A = 5 - 1 = 4
+    prog_image[10] = `OP_SUBM;   prog_image[11] = 8'h1F;   // A = 5 - 1 = 4
     prog_image[12] = `OP_OUTI;   prog_image[13] = 8'h04;   // GPIO = 4
     prog_image[14] = `OP_HALT;
     boot_load(8'd15);

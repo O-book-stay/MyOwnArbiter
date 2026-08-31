@@ -173,24 +173,26 @@ async def test_uart_tx_program(dut):
 
 @cocotb.test()
 async def test_loop_program(dut):
-    """Counter loop with ADDM/SUBI/JMP/JZ: sum 3+2+1 = 6 on the GPIO."""
+    """Counter loop with ADDM/SUBI/JMP/JZ: sum 3+2+1 = 6 on the GPIO.
+
+    The data bytes (counter at 0x00, sum at 0x01) are part of the image, so
+    no initialisation code is needed and the program fits in 32 bytes.
+    """
     await reset(dut)
 
     prog = [
-        OP_LDI, 0x03,       # counter = 3
-        OP_STD, 0x20,
-        OP_LDI, 0x00,       # sum = 0
-        OP_STD, 0x21,
-        OP_LDD, 0x20,       # loop: A = counter
-        OP_JZ, 0x1A,        # done?
-        OP_LDD, 0x21,       # A = sum
-        OP_ADDM, 0x20,      # A += counter
-        OP_STD, 0x21,       # sum = A
-        OP_LDD, 0x20,       # A = counter
+        0x03,               # counter (data) = 3
+        0x00,               # sum (data) = 0
+        OP_LDD, 0x00,       # loop: A = counter
+        OP_JZ, 0x14,        # done?
+        OP_LDD, 0x01,       # A = sum
+        OP_ADDM, 0x00,      # A += counter
+        OP_STD, 0x01,       # sum = A
+        OP_LDD, 0x00,       # A = counter
         OP_SUBI, 0x01,      # counter-1
-        OP_STD, 0x20,
-        OP_JMP, 0x08,
-        OP_LDD, 0x21,       # done: A = sum
+        OP_STD, 0x00,
+        OP_JMP, 0x02,
+        OP_LDD, 0x01,       # done: A = sum
         OP_STD, ADDR_GPIO,  # GPIO = sum
         OP_HALT,
     ]
