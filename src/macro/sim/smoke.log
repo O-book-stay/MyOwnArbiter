@@ -1,0 +1,35 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: * smoke test: sky130_fd_sc_hd__mux2_1 @ tt corner, vdd=1.8v
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vpwr                                       1.8
+vgnd                                         0
+vnb                                          0
+vpb                                        1.8
+a0                                           0
+a1                                           0
+s                                            0
+x                                  2.70604e-09
+vs#branch                                    0
+va1#branch                                   0
+va0#branch                                   0
+vpb#branch                        -2.59504e-12
+vnb#branch                         5.45434e-12
+vss#branch                         2.71548e-12
+vdd#branch                        -5.57476e-12
+
+
+No. of Data Rows : 1220
+tdelay              =  2.003610e-10 targ=  1.017536e-08 trig=  9.975000e-09
+ngspice-42 done

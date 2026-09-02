@@ -1,0 +1,24 @@
+* Smoke test: sky130_fd_sc_hd__mux2_1 @ tt corner, VDD=1.8V
+.lib /home/obooky/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include /home/obooky/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice
+
+VDD  VPWR 0 1.8
+VSS  VGND 0 0
+VNB  VNB  0 0
+VPB  VPB  0 1.8
+
+* S=0 -> X follows A0; A0 pulses high at 2ns
+VA0 A0 0 PULSE(0 1.8 2n 50p 50p 7.9n 20n)
+VA1 A1 0 0
+VS  S  0 0
+
+X1 A0 A1 S VGND VNB VPB VPWR X sky130_fd_sc_hd__mux2_1
+CL X 0 10f
+
+.tran 10p 12n
+.control
+run
+meas tran tdelay TRIG v(A0) VAL=0.9 FALL=1 TARG v(X) VAL=0.9 FALL=1
+quit
+.endc
+.end
