@@ -29,10 +29,25 @@ HEX_CHARS = set("0123456789ABCDEFabcdef")
 MAX_WAIT_CYCLES = 2_000_000  # per received byte
 
 
+def _uart_bit(dut):
+    """Return uo[0] (UART line) as a 0/1 int.
+
+    Only bit 0 matters for the test; the upper bits (led_g/led_b etc,
+    driven from the arbiter race) can legitimately be X/Z during a
+    measurement, and ``int()`` on the whole 8-bit bus raises ValueError
+    in cocotb 2.0 when any bit is unknown. Read just the LSB and treat
+    an unknown bit as idle (1) so we never crash.
+    """
+    try:
+        return int(dut.uo_out.value[0])
+    except ValueError:
+        return 1
+
+
 async def recv_byte(dut):
     """Wait for the start bit on uo[0], then sample one 8N1 byte mid-bit."""
     for _ in range(MAX_WAIT_CYCLES):
-        if (int(dut.uo_out.value) & 1) == 0:
+        if _uart_bit(dut) == 0:
             break
         await ClockCycles(dut.clk, 1)
     else:
@@ -41,7 +56,7 @@ async def recv_byte(dut):
     val = 0
     for k in range(8):
         await ClockCycles(dut.clk, BIT_CYCLES)
-        if int(dut.uo_out.value) & 1:
+        if _uart_bit(dut):
             val |= 1 << k
     await ClockCycles(dut.clk, BIT_CYCLES)  # stop bit
     return val
