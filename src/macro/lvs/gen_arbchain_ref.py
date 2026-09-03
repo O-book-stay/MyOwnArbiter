@@ -15,7 +15,7 @@
 #   top[0] = bot[0] = launch
 #   top_mux:  X = S ? A1 : A0  with A0=top[g], A1=bot[g], S=ch[g] -> top[g+1]
 #   bot_mux:  X = S ? A1 : A0  with A0=bot[g], A1=top[g], S=ch[g] -> bot[g+1]
-#   arbiter (dlrtp_1, async active-low reset): D=top[N], GATE=bot[N],
+#   arbiter (dfrtp_1, async active-low reset): D=top[N], CLK=bot[N],
 #   RESET_B=arb_rst_n, Q=q
 #
 # Usage: python3 gen_arbchain_ref.py -o <out.spice>
@@ -32,7 +32,7 @@ LEF = os.path.join(REPO, "src", "macro", "arbchain.lef")
 DEFINES = os.path.join(REPO, "src", "puf_defines.v")
 
 MUX = "sky130_fd_sc_hd__mux2_1"
-DFF = "sky130_fd_sc_hd__dlrtp_1"
+DFF = "sky130_fd_sc_hd__dfrtp_1"
 
 # interface expected from arbchain.lef: (DIRECTION, USE)
 EXP_PINS = {}
@@ -45,7 +45,7 @@ EXP_PINS["VPWR"] = ("INOUT", "POWER")
 EXP_PINS["VGND"] = ("INOUT", "GROUND")
 
 EXP_MUX_PINS = {"A0", "A1", "S", "X", "VPWR", "VGND", "VPB", "VNB"}
-EXP_DFF_PINS = {"D", "GATE", "RESET_B", "Q", "VPWR", "VGND", "VPB", "VNB"}
+EXP_DFF_PINS = {"D", "CLK", "RESET_B", "Q", "VPWR", "VGND", "VPB", "VNB"}
 
 
 def parse_lef(path):
@@ -180,7 +180,7 @@ def main():
         n_mux += 1
 
     dff_netmap = {
-        "D": f"top[{stages}]", "GATE": f"bot[{stages}]",
+        "D": f"top[{stages}]", "CLK": f"bot[{stages}]",
         "RESET_B": "arb_rst_n", "Q": "q", **pg,
     }
     body.append(

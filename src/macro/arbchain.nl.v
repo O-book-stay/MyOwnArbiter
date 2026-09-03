@@ -11,13 +11,13 @@
 // netlist runs/macro_lvs/arbchain_ref.spice ("Circuits match
 // uniquely", 53 = 53 nets): 32x sky130_fd_sc_hd__mux2_1 (16
 // switch stages, two mirrored columns) + 1x
-// sky130_fd_sc_hd__dlrtp_1 (arbiter latch, async active-low reset).
+// sky130_fd_sc_hd__dfrtp_1 (arbiter flop, async active-low reset).
 //
 // Topology (stage g in [0,16)):
 //   top[0] = bot[0] = launch
 //   top[g+1] = ch[g] ? bot[g] : top[g]   (top_XX: A0=top[g], A1=bot[g])
 //   bot[g+1] = ch[g] ? top[g] : bot[g]   (bot_XX: A0=bot[g], A1=top[g])
-//   q latches top[16] on the rising edge of bot[16] (dlrtp_1),
+//   q latches top[16] on the rising edge of bot[16] (dfrtp_1),
 //   async-cleared by arb_rst_n.
 //
 // The race outcome is decided by the physical delay skew of the
@@ -263,8 +263,8 @@ module arbchain (
   );
 
   // arbiter latch: samples top[16] on the rising edge of bot[16]
-  sky130_fd_sc_hd__dlrtp_1 arb (
-    .D(top[16]), .GATE(bot[16]), .RESET_B(arb_rst_n), .Q(q)
+  sky130_fd_sc_hd__dfrtp_1 arb (
+    .D(top[16]), .CLK(bot[16]), .RESET_B(arb_rst_n), .Q(q)
 `ifdef USE_POWER_PINS
     , .VPB(VPWR), .VNB(VGND), .VPWR(VPWR), .VGND(VGND)
 `endif

@@ -4,8 +4,9 @@
 # post-layout simulation.
 #
 # Same LABEL alignment as normalize_layout_spice.py (LVS), with one
-# critical difference: the top-level CAPACITORS are kept (the whole
-# point of PEX), and their net names get the same aliasing.
+# critical difference: the top-level PARASITICS are kept (the whole
+# point of PEX) — capacitors AND resistors (full R+C) — and their
+# net names get the same aliasing.
 #   1. net/port aliases: 'EN'->'launch', 'Q'->'q' (GDS vs LEF names)
 #   2. canonical top port list/order from the reference netlist
 #
@@ -56,7 +57,7 @@ for ln in lines:
             if s.startswith("*"):
                 continue
             continue
-        if s.lower().startswith(("x", "c")) or s.startswith("+"):
+        if s.lower().startswith(("x", "c", "r")) or s.startswith("+"):
             top_body.append(s)
         else:
             other_elems.append(s)
@@ -83,7 +84,7 @@ for s in merged:
     if kind == "X":            # Xname net... cellname
         nets = [ALIAS.get(n, n) for n in tok[1:-1]]
         body.append(" ".join([tok[0]] + nets + [tok[-1]]))
-    elif kind == "C":          # Cname net1 [net2] value
+    elif kind in ("C", "R"):   # Cname/Rname net1 [net2] value
         nets = [ALIAS.get(n, n) for n in tok[1:-1]]
         body.append(" ".join([tok[0]] + nets + [tok[-1]]))
     else:
@@ -101,6 +102,7 @@ final_ports += [p for p in (ALIAS.get(p, p) for p in top_ports)
 
 n_x = sum(1 for s in body if s[0].upper() == "X")
 n_c = sum(1 for s in body if s[0].upper() == "C")
+n_r = sum(1 for s in body if s[0].upper() == "R")
 
 with open(OUT, "w") as f:
     f.write("* arbchain Magic PEX (C-only), label-normalized for ngspice\n")
@@ -115,7 +117,7 @@ with open(OUT, "w") as f:
 
 print(f"extracted top ports : {' '.join(top_ports)}")
 print(f"after aliasing      : {' '.join(ALIAS.get(p, p) for p in top_ports)}")
-print(f"body                : {n_x} X instances, {n_c} capacitors")
+print(f"body                : {n_x} X instances, {n_c} capacitors, {n_r} resistors")
 print(f"ports attached to body nets: "
       f"{' '.join(p for p in ref_ports if p in body_nets) or '(none)'}")
 if missing:

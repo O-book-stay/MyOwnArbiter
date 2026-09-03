@@ -1,17 +1,31 @@
 # ============================================================
 # Standalone Magic extraction of the arbchain hard macro GDS
 # into a POST-LAYOUT (PEX) SPICE netlist with parasitic
-# capacitance (C-only: no resistors).
+# resistance and capacitance (full R+C).
 #
 # Diff vs lvs/extract.tcl (the LVS-grade recipe):
 #   - plain `extract` (parasitics ON; the LVS recipe turns them off)
 #   - NOT `ext2spice lvs` (lvs mode strips all caps)
+#   - `extresist`   : distributed wire R. `extract` alone yields
+#                     capacitance only; resistance needs this extra
+#                     pass, which patches <cell>.res.ext next to the
+#                     .ext files. It needs a valid BOX over the cell
+#                     ("box 0 0 <W>um <H>um") and works hierarchically
+#                     (on a flattened cell it SEGFAULTS in magic
+#                     8.3.623, so do NOT flatten).
+#   - `ext2spice extresist on` : incorporate the .res.ext patches
+#                     (without this the R data is silently ignored)
 #   - cthresh 0.0   : keep every capacitor
-#   - rthresh inf   : no resistor elements (C-only PEX)
+#   - rthresh 0     : keep every resistor (segment resistances
+#                     accumulate; a per-segment threshold would
+#                     short them away)
 #   - format ngspice
-#   - keeps std cells hierarchical (cell subckts stay black-boxed
-#     at their own boundary; device models come from the PDK
-#     corner lib at simulation time, as in the smoke test)
+#
+# Output is a FLAT top-level netlist (no .subckt wrappers): every
+# wire segment becomes an R, every node gets substrate/coupling C.
+# The interface nets keep their label names (ch[i], launch, q,
+# arb_rst_n, VPWR, VGND) and are drivable directly from the
+# testbench (src/macro/sim/arbchain_postsim.spice).
 #
 # Env (set by run_pex.sh):
 #   CURRENT_GDS   path to src/macro/arbchain.gds
@@ -54,10 +68,27 @@ cd $::env(EXT_DIR)
 # full extraction: substrate caps + coupling caps
 extract do local
 extract
+puts "EXTRACT_DONE"
+flush stdout
 
-# C-only PEX output, ngspice syntax
+# distributed resistance pass: patches <cell>.res.ext beside the .ext
+# (requires the box to identify the resistor boundary; hierarchical
+# only - flattening segfaults extresist in magic 8.3.623)
+if { [catch {box 0 0 17.28um 82.0um} bm] } {
+    puts "\[WARN\] box failed: $bm"
+}
+flush stdout
+if { [catch {extresist} m] } {
+    puts "\[ERROR\] extresist failed: $m"
+} else {
+    puts "EXTRESIST_OK"
+}
+flush stdout
+
+# R+C PEX output, ngspice syntax
 ext2spice cthresh 0.0
-ext2spice rthresh infinite
+ext2spice rthresh 0
+ext2spice extresist on
 ext2spice format ngspice
 ext2spice -o $::env(SAVE_SPICE) $::env(DESIGN_NAME).ext
 
